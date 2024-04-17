@@ -17,6 +17,9 @@ const chatSchema = Schema({
     time:{
         type:String,
         required:true
+    },
+    status:{
+        type:Boolean
     }
 },{
     timestamps:true

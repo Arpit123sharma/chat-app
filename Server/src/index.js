@@ -2,6 +2,7 @@ import express from "express"
 import dotenv from 'dotenv'
 import {connectDB} from "./DB/mongodb.connection.js"
 import cors from "cors"
+import { registerUser } from "./Controllers/registerUser.auth.js"
 
 dotenv.config({
     path:"./.env"
@@ -16,6 +17,10 @@ app.use(express.json())
 app.use(express.urlencoded({
     extended:true
 }))
+// routing
+
+app.route("/chat-app/api/v1/user/register").post(registerUser)
+
 
 
 connectDB()
