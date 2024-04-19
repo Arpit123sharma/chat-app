@@ -3,7 +3,7 @@ import dotenv from 'dotenv'
 import {connectDB} from "./DB/mongodb.connection.js"
 import cors from "cors"
 import { registerUser } from "./Controllers/registerUser.auth.js"
-
+import { upload } from "./Middlewares/multer.js"
 dotenv.config({
     path:"./.env"
 })
@@ -19,7 +19,7 @@ app.use(express.urlencoded({
 }))
 // routing
 
-app.route("/chat-app/api/v1/user/register").post(registerUser)
+app.route("/chat-app/api/v1/user/register").post(upload.single("profile"),registerUser)
 
 
 

@@ -1,6 +1,6 @@
 import mongoose,{Schema} from "mongoose"
-
-const userSchema = Schema({
+import bcrypt from "bcrypt"
+const userSchema = new Schema({
     userName:{
         type:String,
         required:true,
@@ -12,8 +12,8 @@ const userSchema = Schema({
         lowercase:true,
         unique:true  
     },
-    Number:{
-        type:Number,
+    phone:{
+        type:String,
         required:true,
         unique:true
     },
@@ -29,4 +29,14 @@ const userSchema = Schema({
     timestamps:true
 })
 
-export const User = mongoose.model("User",userSchema);
+userSchema.pre("save",async function(next){
+    if(!this.isModified) return next();
+    try {
+        this.password = await bcrypt.hash(this.password,10); 
+    } catch (error) {
+        throw error
+    }
+    next();
+})
+
+export const User = mongoose.model("User", userSchema)
