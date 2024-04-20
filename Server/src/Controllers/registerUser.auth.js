@@ -2,6 +2,7 @@ import {ApiError} from "../utils/error.js"
 import  {User}  from "../Models/user.model.js"
 import { uploadOnCloudinary } from "../utils/cloudinary.js"
 import {ApiResponse} from "../utils/ApiResponse.js"
+import { emailService } from "../utils/smsService.js"
 const registerUser = async(req,res)=>{
     try {
        const{userName,password,phone,email} =  req.body
@@ -49,6 +50,8 @@ const registerUser = async(req,res)=>{
         throw new ApiError(500,"oops! something went wrong while fetching user data newlycreated user")
       }  
       
+       emailService.sendOtp(userData?.email,true)
+       
       return res.status(200).json(
         new ApiResponse("user created successfully !!!",userData,200)
       )
