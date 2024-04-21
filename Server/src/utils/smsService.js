@@ -28,21 +28,36 @@ export class smsService{
        this.key = otp();
    }
    
-   async sendOtp(email){
+   async sendOtp(email,mssg = false){
       //const key = otp();
       try {
-         const messageId = await this.transporter.sendMail({
-            from:process.env.GMAIL_USER,
-            to:[email] ,
-            subject: "email for otp verfication of chat-app", // Subject line
-            text: "this is your otp !! don't share with anyone !!", // plain text body
-            html: `<h1>${this.key}</h1>`, // html body
-         }) 
-         if (!messageId) {
-            console.log("oops! something went wrong happend while sending email");
+         if (!mssg) {
+            const messageId = await this.transporter.sendMail({
+               from:process.env.GMAIL_USER,
+               to:[email] ,
+               subject: "email for otp verfication of chat-app", // Subject line
+               text: "this is your otp !! don't share with anyone !!", // plain text body
+               html: `<h1>${this.key}</h1>`, // html body
+            }) 
+            if (!messageId) {
+               console.log("oops! something went wrong happend while sending email");
+            }
+            console.log("email send successfully !!");
+            return this.key;
+         } else {
+            const messageId = await this.transporter.sendMail({
+               from:process.env.GMAIL_USER,
+               to:[email] ,
+               subject: "success full registration in chat-app", // Subject line
+              // text: "this is your otp !! don't share with anyone !!", // plain text body
+               html: `<h1>your rigstration is completed in chat-app !! thank's for choosing us !</h1>`, // html body
+            }) 
+            if (!messageId) {
+               console.log("oops! something went wrong happend while sending email");
+            }
+            console.log("email send successfully !!");
+            return this.key;
          }
-         console.log("email send successfully !!");
-         return this.key;
       } catch (error) {
           console.error("error in sending the otp through gmail :: ",error);
       }

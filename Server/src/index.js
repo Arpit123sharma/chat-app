@@ -4,6 +4,8 @@ import {connectDB} from "./DB/mongodb.connection.js"
 import cors from "cors"
 import { registerUser } from "./Controllers/registerUser.auth.js"
 import { upload } from "./Middlewares/multer.js"
+import { loginInUser, otpVerification } from "./Controllers/LoginIn.auth.js"
+import cookieParser from "cookie-parser"
 dotenv.config({
     path:"./.env"
 })
@@ -17,11 +19,12 @@ app.use(express.json())
 app.use(express.urlencoded({
     extended:true
 }))
+app.use(cookieParser())
 // routing
 
-app.route("/chat-app/api/v1/user/register").post(upload.single("profile"),registerUser)
-
-
+app.route("/chat-app/api/v1/user/register").post(upload.single("profile"),registerUser) // signup
+app.route("/chat-app/api/v1/user/login").post(loginInUser)// login make session
+app.route("/chat-app/api/v1/user/otpVerification").post(otpVerification) // login 2 step verification (otp)
 
 connectDB()
 .then(()=>{
