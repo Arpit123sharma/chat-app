@@ -39,8 +39,7 @@ const loginInUser = async(req,res)=>{
             throw new ApiError(500,"did'nt find the otp")
         }
         return res.status(200)
-        .cookie("accessToken","")
-        .cookie("refreshToken","")
+        
         .cookie("sessionID",sessionID,{
             httpOnly:true,
             secure:true
@@ -97,7 +96,7 @@ const otpVerification = async(req,res)=>{
         return res.status(200)
         .cookie("accessToken",accessToken,options)
         .cookie("refreshToken",refreshToken,options)
-        .cookie("sessionID","",options)
+        .clearCookie("sessionID",options)
         .json(
             new ApiResponse("otp verification completed !! refresh and access token created successfully!!",{
                 userData:user,
@@ -109,7 +108,86 @@ const otpVerification = async(req,res)=>{
     }
 }
 
+const regenerateAccessToken = async(req,res)=>{
+    try {
+         const refreshToken = req.cookies?.refreshToken || ""
+         if (!refreshToken) {
+            throw new ApiError(400,"refresh token is required")
+         }
+
+         const userID = await jwt.verify(refreshToken,process.env.JWT_SECRET)
+
+         if (!userID) {
+            throw new ApiError(401,"pls login again !!")
+         }
+
+         const user = await User.findById(userID)
+
+         if (!user) {
+            throw new ApiError(400,"invalid token can't find user")
+         }
+
+         if(refreshToken !== user?.refreshToken){
+            throw new ApiError(400,"token maybe expired or invalid it does'nt match reefreshToken in the database !!")
+         }
+
+         const accessToken = await user.generateTokens("1h",{
+            userName: this.userName,
+            email:this.email
+         })
+
+         if (!accessToken) {
+            throw new ApiError(400,"error in making access Token")
+         }
+
+         return res.status(200)
+         .cookie("accessToken",accessToken,{
+            httpOnly:true,
+            secure:true
+         })
+         .json(
+            new ApiResponse("successfully regenerate access token using refresh token",accessToken,200)
+         )
+
+    } catch (error) {
+        console.error("error in regeneration of accessToken through refresh token :: ",error);
+    }
+}
+
+const forgetPassword = async(req,res)=>{
+   const {phone} = req.body
+   if (!phone) {
+      throw new ApiError(400,"phone number is required  !!")
+   }
+
+   const user = await User.findOne({
+       phone:phone
+   })
+
+   if (!user) {
+      throw new ApiError(400,"incorrect phone number")
+   }
+
+   const sessionID = await user.generateTokens("300s")
+   if (!sessionID) {
+    throw new ApiError(400,"error in generating the session id !!")
+   }
+   
+   await emailService.sendOtp(user?.email)
+
+   return res.status(200)
+   .cookie("sessionID",sessionID,{
+     httpOnly:true,
+     secure:true
+   })
+   .json(
+      new ApiResponse("user verifiyed successfully for changing the password otp and sessionID sended !!",{},200)
+   )
+   
+}
 export {
     loginInUser,
-    otpVerification
+    otpVerification,
+    regenerateAccessToken,
+    forgetPassword
 }
