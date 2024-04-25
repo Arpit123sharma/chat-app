@@ -11,7 +11,7 @@ const router = Router()
 router.route("/register").post(upload.single("profile"),registerUser) // signup
 router.route("/login").post(loginInUser)// login make session
 router.route("/otpVerification").post(authMiddleware,otpVerification) // login 2 step verification (otp)
-router.route("/regenerateToken").post(regenerateAccessToken)
+router.route("/regenerateToken").get(regenerateAccessToken)
 router.route("/forgetPassword").post(forgetPassword)
 
 // profile edit routes

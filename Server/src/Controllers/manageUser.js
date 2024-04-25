@@ -5,20 +5,19 @@ import { emailService } from "../utils/smsService.js"
 
 const updateUser = async(req,res)=>{
     try {
-       const {userName="",email="",profile=""} = req.body 
-       const {_id} = req?.user
-       if ([userName,email,profile].forEach((val)=>(val?.trim()===""))) {
-        return res.status(400).json( new ApiError(400,"atleast one field is required !!"));
-         
-       }
-       const itemsToUpdate = {}
-       const obj = {userName,email,profile}
-       for(let key in obj){
-           if(obj[key].trim()){
-              itemsToUpdate = {...itemsToUpdate,key : obj[key]}
-           }
-       };
-       const user = await User.findByIdAndUpdate(_id,itemsToUpdate,{
+       const {userName="",email=""} = req.body 
+       const _id = req?.user?._id
+       if (![userName, email].some(val => val?.trim())) {
+        return res.status(400).json(new ApiError(400, "at least one field is required !!"));
+    }
+       let itemsToUpdate = {}
+       const obj = {userName,email}
+
+      if(userName.trim()) itemsToUpdate={...itemsToUpdate,userName}
+      if(email.trim()) itemsToUpdate={...itemsToUpdate,email}
+     
+      
+       const user = await User.findByIdAndUpdate(_id,{...itemsToUpdate},{
          new:true
        })
 
@@ -55,7 +54,7 @@ const changePassword = async(req,res)=>{
         return res.status(500).json( new ApiError(500,"user can't be fetched"));
       }
 
-      if (userFromDB.isPasswordCorrect(newPassword)) {
+      if (await userFromDB.isPasswordCorrect(newPassword)) {
         return res.status(400).json( new ApiError(400,"old password is same as new passowrd"));
       }
 
@@ -78,10 +77,24 @@ const logoutUser = async(req,res)=>{
    if (!user) {
     return res.status(401).json( new ApiError(401,"unAuthorised access !!"));
    }
+
+   const userFromDB = await User.findByIdAndUpdate(user?._id,{
+    $unset:{
+      refreshToken:1
+    }
+   },{
+    new:true
+   })
+
+   if (!userFromDB) {
+    return res.status(500).json( new ApiError(500,"server error userFromDB not found"));
+   }
+
    const options ={
      httpOnly:true,
      secure:true
    }
+
    return res.status(200)
    .clearCookie("accessToken")
    .clearCookie("refreshToken")

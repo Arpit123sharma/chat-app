@@ -27,6 +27,7 @@ const authMiddleware = async(req,res,next)=>{
         next();
     } catch (error) {
         console.error("error in check user is authenticated or not ",error);
+        return res.status(401).json(new ApiError(401,`${error}`)) 
     }
 }
 

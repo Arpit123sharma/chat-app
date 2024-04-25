@@ -91,7 +91,7 @@ const otpVerification = async(req,res)=>{
         if (!userFromDB) {
             throw new ApiError(400,"user not finded")
         }
-        
+
         const accessToken = await userFromDB.generateTokens("1h",{
             userName:user.userName,
             email:user.email,
@@ -150,8 +150,8 @@ const regenerateAccessToken = async(req,res)=>{
          }
 
          const accessToken = await user.generateTokens("1h",{
-            userName: this.userName,
-            email:this.email
+            userName: user?.userName,
+            email:user?.email
          })
 
          if (!accessToken) {
@@ -186,13 +186,15 @@ const forgetPassword = async(req,res)=>{
     return res.status(400).json( new ApiError(400,"incorrect phone number"));
    }
 
-   const accessToken = await user.generateTokens("300s")
+
+
+   const otp = await emailService.sendOtp(user?.email)
+
+   const accessToken = await user.generateTokens("1h",{otp:otp})
    if (!accessToken) {
     return res.status(400).json( new ApiError(400,"prblm in generating the accessToken"));
    }
    
-   await emailService.sendOtp(user?.email)
-
    return res.status(200)
    .cookie("accessToken",accessToken,{
      httpOnly:true,
