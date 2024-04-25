@@ -8,7 +8,8 @@ const loginInUser = async(req,res)=>{
         const {email , phone , password} = req.body
         
         if ((!email && !phone) || !password) {
-            throw new ApiError(400,"email or phone  and passowrd is required!!")
+            return res.status(400)
+            .json( new ApiError(400,"email or phone  and passowrd is required!!"))
         }
         
         const user = await User.findOne({
@@ -17,26 +18,31 @@ const loginInUser = async(req,res)=>{
         
         //console.log(user);
         if (!user) {
-            throw new ApiError(400,"user with this email or phone number does not exits!!")
+            return res.status(400)
+            .json(  new ApiError(400,"user with this email or phone number does not exits!!"))  
         }
         
         const passwordCheck = await user.isPasswordCorrect(password)
         //console.log(passwordCheck);
         if (! passwordCheck) {
-            throw new ApiError(400,"password did'nt match !! incorrect password")
+            return res.status(400)
+            .json(  new ApiError(400,"password did'nt match !! incorrect password"))
+             
         }
         
         const accessToken = await user.generateTokens("300s")
 
         if (!accessToken) {
-            throw new ApiError(500,"unable to generate the accessToken")
+            return res.status(500)
+            .json( new ApiError(500,"unable to generate the accessToken"))  
         }
 
         
         const otp = await emailService.sendOtp(user.email);
 
         if (!otp) {
-            throw new ApiError(500,"did'nt find the otp")
+            return res.status(500)
+            .json( new ApiError(500,"unable to generate the otp")) 
         }
         return res.status(200)
         
@@ -50,7 +56,7 @@ const loginInUser = async(req,res)=>{
         
     } catch (error) {
         //throw new ApiError(500,"error occur :: during signing user ",[error]);
-        throw error
+        console.error("error while login user :: ",error);
     }
 }
 
@@ -59,19 +65,17 @@ const otpVerification = async(req,res)=>{
         //const{sessionID} = req.params
         const{otp} = req.body
         if(!emailService.verifyOtp(otp)){
-            throw new ApiError(400,"otp is incorrect !!")
+            return res.status(400)
+            .json( new ApiError(400,"otp is not matched !!"))    
         }
         
-        // const userId = await jwt.verify(req.cookies?.sessionID,process.env.JWT_SECRET)
-
-        // if (!userId) {
-        //     throw new ApiError(400,"pls login first!!!")
-        // }
 
         const user = req?.user
 
         if (!user) {
-            throw new ApiError(400,"user don't find !!")
+            return res.status(400)
+            .json( new ApiError(400,"user don't find !!"))
+            
         }
 
         const accessToken = await user.generateTokens("1h",{
@@ -79,10 +83,10 @@ const otpVerification = async(req,res)=>{
             email:user.email,
         })
         
-        if(!accessToken) throw new ApiError(500,"error in generating access token");
+        if(!accessToken) return res.status(500).json( new ApiError(500,"error in generating access token"));
         const refreshToken = await user.generateTokens("10d")
 
-        if(!refreshToken) throw new ApiError(500,"error in generating refresh token");
+        if(!refreshToken) return res.status(500).json( new ApiError(500,"error in generating refresh token"));
 
         user.refreshToken = refreshToken
         await user.save({
@@ -111,23 +115,24 @@ const regenerateAccessToken = async(req,res)=>{
     try {
          const refreshToken = req.cookies?.refreshToken || ""
          if (!refreshToken) {
-            throw new ApiError(400,"refresh token is required")
+            return res.status(500).json( new ApiError(500,"refresh token is required"));
          }
 
          const userID = await jwt.verify(refreshToken,process.env.JWT_SECRET)
 
          if (!userID) {
-            throw new ApiError(401,"pls login again !!")
+            return res.status(401).json( new ApiError(401,"pls login again"));
          }
 
          const user = await User.findById(userID)
 
          if (!user) {
-            throw new ApiError(400,"invalid token can't find user")
+            return res.status(400).json( new ApiError(400,"inavlid token cant't find the user"));
          }
 
          if(refreshToken !== user?.refreshToken){
-            throw new ApiError(400,"token maybe expired or invalid it does'nt match reefreshToken in the database !!")
+            return res.status(400).json( new ApiError(400,"token maybe expired or invalid it does'nt match refreshToken in the database !!"));
+            
          }
 
          const accessToken = await user.generateTokens("1h",{
@@ -136,7 +141,7 @@ const regenerateAccessToken = async(req,res)=>{
          })
 
          if (!accessToken) {
-            throw new ApiError(400,"error in making access Token")
+            return res.status(500).json( new ApiError(500,"problem in generating the accessToken pls try again !!"));
          }
 
          return res.status(200)
@@ -156,7 +161,7 @@ const regenerateAccessToken = async(req,res)=>{
 const forgetPassword = async(req,res)=>{
    const {phone} = req.body
    if (!phone) {
-      throw new ApiError(400,"phone number is required  !!")
+    return res.status(400).json( new ApiError(400,"phone number is required"));
    }
 
    const user = await User.findOne({
@@ -164,12 +169,12 @@ const forgetPassword = async(req,res)=>{
    })
 
    if (!user) {
-      throw new ApiError(400,"incorrect phone number")
+    return res.status(400).json( new ApiError(400,"incorrect phone number"));
    }
 
    const accessToken = await user.generateTokens("300s")
    if (!accessToken) {
-    throw new ApiError(400,"error in generating the session id !!")
+    return res.status(400).json( new ApiError(400,"prblm in generating the accessToken"));
    }
    
    await emailService.sendOtp(user?.email)

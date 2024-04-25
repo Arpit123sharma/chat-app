@@ -1,8 +1,8 @@
 import { Router } from "express"
-import { registerUser } from "./Controllers/registerUser.auth.js"
-import { upload } from "./Middlewares/multer.js"
-import { forgetPassword, loginInUser, otpVerification, regenerateAccessToken } from "./Controllers/LoginIn.auth.js"
-import {authMiddleware} from "./Middlewares/Auth.middleware.js"
+import { registerUser } from "../Controllers/registerUser.auth.js"
+import { upload } from "../Middlewares/multer.js"
+import { forgetPassword, loginInUser, otpVerification, regenerateAccessToken } from "../Controllers/LoginIn.auth.js"
+import {authMiddleware} from "../Middlewares/Auth.middleware.js"
 import { changePassword, deleteAccount, logoutUser, updateUser } from "../Controllers/manageUser.js"
 
 

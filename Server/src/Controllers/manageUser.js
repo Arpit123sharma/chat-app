@@ -8,7 +8,8 @@ const updateUser = async(req,res)=>{
        const {userName="",email="",profile=""} = req.body 
        const {_id} = req?.user
        if ([userName,email,profile].forEach((val)=>(val?.trim()===""))) {
-         throw new ApiError(400,"atleast one field is required !!")
+        return res.status(400).json( new ApiError(400,"atleast one field is required !!"));
+         
        }
        const itemsToUpdate = {}
        const obj = {userName,email,profile}
@@ -22,7 +23,8 @@ const updateUser = async(req,res)=>{
        })
 
        if (!user) {
-         throw new ApiError(500,"user cant be updated")
+        return res.status(500).json( new ApiError(500,"user cant be updated"));
+         throw 
        }
 
        return res.status(200)
@@ -40,21 +42,21 @@ const changePassword = async(req,res)=>{
       const user = req?.user
       
       if (!user) {
-        throw new ApiError(401,"unAuthorised access")
+        return res.status(401).json( new ApiError(401,"unAuthorised access !!"));
       }
 
       const {newPassword} = req.body
       if (!newPassword) {
-        throw new ApiError(400,"password is required")
+        return res.status(400).json( new ApiError(400,"password is required"));
       }
 
       const userFromDB = await User.findById(user._id)
       if (!userFromDB) {
-        throw new ApiError(500,"user not fetched")
+        return res.status(500).json( new ApiError(500,"user can't be fetched"));
       }
 
       if (userFromDB.isPasswordCorrect(newPassword)) {
-        throw new ApiError(400,"newPassword is same as old password")
+        return res.status(400).json( new ApiError(400,"old password is same as new passowrd"));
       }
 
       userFromDB.password = newPassword
@@ -74,7 +76,7 @@ const changePassword = async(req,res)=>{
 const logoutUser = async(req,res)=>{
    const user = req?.user
    if (!user) {
-    throw new ApiError(400,"unAuthorised access")
+    return res.status(401).json( new ApiError(401,"unAuthorised access !!"));
    }
    const options ={
      httpOnly:true,
@@ -92,12 +94,12 @@ const deleteAccount = async(req,res)=>{
   
   const user = req?.user
    if (!user) {
-    throw new ApiError(400,"unAuthorised access")
+    return res.status(401).json( new ApiError(401,"unAuthorised access !!"));
    }
    
    const deletedAccount = await User.findByIdAndDelete(user?._id)
    if (!deleteAccount) {
-    throw new ApiError(500,"can't delete account!!")
+    return res.status(401).json( new ApiError(401,"account can't be deleted due to some problem in server try after sometime !!"));
    }
 
    return res.status(200)
