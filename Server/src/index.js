@@ -2,9 +2,7 @@ import express from "express"
 import dotenv from 'dotenv'
 import {connectDB} from "./DB/mongodb.connection.js"
 import cors from "cors"
-import { registerUser } from "./Controllers/registerUser.auth.js"
-import { upload } from "./Middlewares/multer.js"
-import { forgetPassword, loginInUser, otpVerification, regenerateAccessToken } from "./Controllers/LoginIn.auth.js"
+import userRouter from "./Routes/user.route.js"
 import cookieParser from "cookie-parser"
 dotenv.config({
     path:"./.env"
@@ -22,11 +20,8 @@ app.use(express.urlencoded({
 app.use(cookieParser())
 // routing
 
-app.route("/chat-app/api/v1/user/register").post(upload.single("profile"),registerUser) // signup
-app.route("/chat-app/api/v1/user/login").post(loginInUser)// login make session
-app.route("/chat-app/api/v1/user/otpVerification").post(otpVerification) // login 2 step verification (otp)
-app.route("/chat-app/api/v1/user/regenerateToken").post(regenerateAccessToken)
-app.route("/chat-app/api/v1/user/forgetPassword").post(forgetPassword)
+app.use("/chat-app/api/v1/user",userRouter)
+
 
 
 connectDB()

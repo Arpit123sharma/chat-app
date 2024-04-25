@@ -26,10 +26,10 @@ const loginInUser = async(req,res)=>{
             throw new ApiError(400,"password did'nt match !! incorrect password")
         }
         
-        const sessionID = await user.generateTokens("300s")
+        const accessToken = await user.generateTokens("300s")
 
-        if (!sessionID) {
-            throw new ApiError(500,"unable to generate the sessionId")
+        if (!accessToken) {
+            throw new ApiError(500,"unable to generate the accessToken")
         }
 
         
@@ -40,7 +40,7 @@ const loginInUser = async(req,res)=>{
         }
         return res.status(200)
         
-        .cookie("sessionID",sessionID,{
+        .cookie("accessToken",accessToken,{
             httpOnly:true,
             secure:true
         })
@@ -62,13 +62,13 @@ const otpVerification = async(req,res)=>{
             throw new ApiError(400,"otp is incorrect !!")
         }
         
-        const userId = await jwt.verify(req.cookies?.sessionID,process.env.JWT_SECRET)
+        // const userId = await jwt.verify(req.cookies?.sessionID,process.env.JWT_SECRET)
 
-        if (!userId) {
-            throw new ApiError(400,"pls login first!!!")
-        }
+        // if (!userId) {
+        //     throw new ApiError(400,"pls login first!!!")
+        // }
 
-        const user = await User.findById(userId);
+        const user = req?.user
 
         if (!user) {
             throw new ApiError(400,"user don't find !!")
@@ -96,7 +96,6 @@ const otpVerification = async(req,res)=>{
         return res.status(200)
         .cookie("accessToken",accessToken,options)
         .cookie("refreshToken",refreshToken,options)
-        .clearCookie("sessionID",options)
         .json(
             new ApiResponse("otp verification completed !! refresh and access token created successfully!!",{
                 userData:user,
@@ -168,15 +167,15 @@ const forgetPassword = async(req,res)=>{
       throw new ApiError(400,"incorrect phone number")
    }
 
-   const sessionID = await user.generateTokens("300s")
-   if (!sessionID) {
+   const accessToken = await user.generateTokens("300s")
+   if (!accessToken) {
     throw new ApiError(400,"error in generating the session id !!")
    }
    
    await emailService.sendOtp(user?.email)
 
    return res.status(200)
-   .cookie("sessionID",sessionID,{
+   .cookie("accessToken",accessToken,{
      httpOnly:true,
      secure:true
    })

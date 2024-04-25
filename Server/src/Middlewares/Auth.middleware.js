@@ -28,3 +28,7 @@ const authMiddleware = async(req,res,next)=>{
         console.error("error in check user is authenticated or not ",error);
     }
 }
+
+export {
+    authMiddleware
+}
