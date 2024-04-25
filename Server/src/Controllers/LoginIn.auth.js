@@ -26,17 +26,8 @@ const loginInUser = async(req,res)=>{
         //console.log(passwordCheck);
         if (! passwordCheck) {
             return res.status(400)
-            .json(  new ApiError(400,"password did'nt match !! incorrect password"))
-             
+            .json(  new ApiError(400,"password did'nt match !! incorrect password"))    
         }
-        
-        const accessToken = await user.generateTokens("300s")
-
-        if (!accessToken) {
-            return res.status(500)
-            .json( new ApiError(500,"unable to generate the accessToken"))  
-        }
-
         
         const otp = await emailService.sendOtp(user.email);
 
@@ -44,6 +35,15 @@ const loginInUser = async(req,res)=>{
             return res.status(500)
             .json( new ApiError(500,"unable to generate the otp")) 
         }
+
+        const accessToken = await user.generateTokens("1h",{otp:otp})
+
+        if (!accessToken) {
+            return res.status(500)
+            .json( new ApiError(500,"unable to generate the accessToken"))  
+        }
+
+        
         return res.status(200)
         
         .cookie("accessToken",accessToken,{
@@ -51,40 +51,54 @@ const loginInUser = async(req,res)=>{
             secure:true
         })
         .json(
-            new ApiResponse("user verified successfully :: otp and sessionID send successfully",{},200)
+            new ApiResponse("user verified successfully :: otp and token send successfully",{},200)
         )
         
     } catch (error) {
-        //throw new ApiError(500,"error occur :: during signing user ",[error]);
         console.error("error while login user :: ",error);
     }
 }
 
 const otpVerification = async(req,res)=>{
     try {
-        //const{sessionID} = req.params
-        const{otp} = req.body
-        if(!emailService.verifyOtp(otp)){
-            return res.status(400)
-            .json( new ApiError(400,"otp is not matched !!"))    
-        }
-        
 
-        const user = req?.user
+         const{otp} = req.body
+         const user = req?.user
+         const otpCode = req?.otp
 
-        if (!user) {
-            return res.status(400)
-            .json( new ApiError(400,"user don't find !!"))
+        if (!user || !otpCode) {
+            return res.status(401)
+            .json( new ApiError(401,"unAuthorised Access"))
             
         }
 
-        const accessToken = await user.generateTokens("1h",{
+        if (!otp) {
+            return res.status(400)
+            .json( new ApiError(400,"otp is required !!")) 
+        }
+      //console.log(otp,user?.otp);
+
+        if (otp !== otpCode) {
+            return res.status(400)
+             .json( new ApiError(400,"otp is not matched !!"))
+        }
+       //console.log(user);
+
+        const userFromDB = await User.findOne({
+            email:user?.email
+        })
+
+        if (!userFromDB) {
+            throw new ApiError(400,"user not finded")
+        }
+        
+        const accessToken = await userFromDB.generateTokens("1h",{
             userName:user.userName,
             email:user.email,
         })
         
         if(!accessToken) return res.status(500).json( new ApiError(500,"error in generating access token"));
-        const refreshToken = await user.generateTokens("10d")
+        const refreshToken = await userFromDB.generateTokens("10d")
 
         if(!refreshToken) return res.status(500).json( new ApiError(500,"error in generating refresh token"));
 

@@ -24,7 +24,7 @@ const updateUser = async(req,res)=>{
 
        if (!user) {
         return res.status(500).json( new ApiError(500,"user cant be updated"));
-         throw 
+         
        }
 
        return res.status(200)
@@ -83,8 +83,8 @@ const logoutUser = async(req,res)=>{
      secure:true
    }
    return res.status(200)
-   .clearCookie("accessToken",accessToken,options)
-   .clearCookie("refreshToken",refreshToken,options)
+   .clearCookie("accessToken")
+   .clearCookie("refreshToken")
    .json(
     new ApiResponse("user logged out successFully !!",{},200)
    )

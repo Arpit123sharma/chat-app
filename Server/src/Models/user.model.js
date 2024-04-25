@@ -50,14 +50,16 @@ userSchema.methods.isPasswordCorrect = async function(password){
 userSchema.methods.generateTokens = async function(time,data = {}){
     try {
         
-      return await jwt.sign({
-        _id : this._id,
-        ...data
-      },process.env.JWT_SECRET,{
-        expiresIn:time
-      })
+      
+        return await jwt.sign({
+            _id : this._id,
+            ...data
+          },process.env.JWT_SECRET,{
+            expiresIn:time
+          })
+       }
 
-    } catch (error) {
+    catch (error) {
        console.error("error :: during the token generation :: ",error); 
     }
 }

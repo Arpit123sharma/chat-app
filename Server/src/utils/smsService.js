@@ -25,13 +25,14 @@ export class smsService{
          },
        });
        
-       this.key = otp();
+       
    }
    
-   async sendOtp(email,mssg = false){
-      //const key = otp();
+   async sendOtp(email,bool = false,message=""){
+     
       try {
-         if (!mssg) {
+         if (!bool) {
+            this.key = otp();
             const messageId = await this.transporter.sendMail({
                from:process.env.GMAIL_USER,
                to:[email] ,
@@ -48,9 +49,9 @@ export class smsService{
             const messageId = await this.transporter.sendMail({
                from:process.env.GMAIL_USER,
                to:[email] ,
-               subject: "success full registration in chat-app", // Subject line
+               subject: "success full registration in chat-app" , // Subject line
               // text: "this is your otp !! don't share with anyone !!", // plain text body
-               html: `<h1>your rigstration is completed in chat-app !! thank's for choosing us !</h1>`, // html body
+               html: message||`<h1>your rigstration is completed in chat-app !! thank's for choosing us !</h1>`, // html body
             }) 
             if (!messageId) {
                console.log("oops! something went wrong happend while sending email");
@@ -64,9 +65,6 @@ export class smsService{
      
    }
    
-   async verifyOtp(userOtp){
-      return (userOtp === this.key)
-   }
 }
 
 

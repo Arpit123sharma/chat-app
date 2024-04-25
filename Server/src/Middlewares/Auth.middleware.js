@@ -1,5 +1,4 @@
 import {ApiError} from "../utils/error.js"
-//import {ApiResponse} from "../utils/ApiResponse.js"
 import {User} from "../Models/user.model.js"
 import jwt from "jsonwebtoken"
 const authMiddleware = async(req,res,next)=>{
@@ -7,23 +6,25 @@ const authMiddleware = async(req,res,next)=>{
        const accessToken = req.cookies?.accessToken || ""
        
        if (!accessToken?.trim()) {
-          throw new ApiError(401,"pls login first there is no access token")
+          return res.status(401).json(new ApiError(401,"pls login first there is no access token"))
        }
          
-        const userID = await jwt.verify(accessToken,process.env.JWT_SECRET)
+        const decodedToken = await jwt.verify(accessToken,process.env.JWT_SECRET)
 
-        if (!userID?.trim()) {
-            throw new ApiError(400,"token is expired or corrupted ")
+        if (!decodedToken) {
+            return res.status(401).json(new ApiError(400,"token is expired or corrupted "))
+            
         }
 
-        const user = await User.findById(userID).select("-password -refreshToken")
+        const user = await User.findById(decodedToken?._id).select("-password -refreshToken")
+        const verificationCode = decodedToken?.otp
 
         if (!user) {
-            throw new ApiError(400,"user not found")
+            return res.status(400).json(new ApiError(400,"user not found")) 
         }
-
         req.user = user
-        return next();
+        req.otp = verificationCode
+        next();
     } catch (error) {
         console.error("error in check user is authenticated or not ",error);
     }
