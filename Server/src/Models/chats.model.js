@@ -1,10 +1,10 @@
 import mongoose,{Schema} from "mongoose"
-import User from "./user.model.js"
+
 
 const chatSchema = Schema({
     source:{
         type:Schema.Types.ObjectId,
-        ref:User
+        ref:'User'
     },
     payload:{
         type:String,
@@ -12,13 +12,16 @@ const chatSchema = Schema({
     },
     destination:{
         type:Schema.Types.ObjectId,
-        ref:User
+        ref:'User'
     },
     time:{
         type:String,
         required:true
     },
-    status:{
+    mssgStatus:{
+        type:Boolean
+    },
+    readStatus : {
         type:Boolean
     }
 },{

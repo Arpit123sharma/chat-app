@@ -1,4 +1,4 @@
-import mongoose,{Schema} from "mongoose"
+import mongoose,{Schema, Types} from "mongoose"
 import bcrypt from "bcrypt"
 import jwt  from "jsonwebtoken"
 const userSchema = new Schema({
@@ -28,7 +28,32 @@ const userSchema = new Schema({
     },
     refreshToken:{
         type:String
-    }
+    },
+    friends:[
+        {
+        friendId:{
+            type:Types.ObjectId,
+            ref:'User',
+        },
+        friendSince:{
+            type:Date,
+            default:Date.now()
+        }
+
+     }
+    ],
+    groups:[
+        {
+            GroupsId:{
+                type:Types.ObjectId,
+                ref:'Group'
+            },
+            joinedAt:{
+                type:Date,
+                default:Date.now()
+            }
+        }
+    ]
 },{
     timestamps:true
 })
