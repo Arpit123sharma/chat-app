@@ -37,7 +37,7 @@ const userSchema = new Schema({
         },
         friendSince:{
             type:Date,
-            default:Date.now()
+            default:Date.now
         }
 
      }
@@ -50,13 +50,15 @@ const userSchema = new Schema({
             },
             joinedAt:{
                 type:Date,
-                default:Date.now()
+                default:Date.now
             }
         }
     ]
 },{
     timestamps:true
 })
+
+userSchema.index({userName:"text"})
 
 userSchema.pre("save",async function(next){
     if(!this.isModified("password")) return next();

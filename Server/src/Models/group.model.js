@@ -18,10 +18,12 @@ const groupSchema = new Schema({
             },
             joinedSince:{
                 type:Date,
-                default:Date.now()
+                default:Date.now
             }
         }
     ]
 },{timestamps:true})
+
+groupSchema.index({groupName:"text"})
 
 export default Group = mongoose.model(groupSchema,'Group');
