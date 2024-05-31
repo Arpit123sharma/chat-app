@@ -24,6 +24,6 @@ const groupSchema = new Schema({
     ]
 },{timestamps:true})
 
-groupSchema.index({groupName:"text"})
 
-export default Group = mongoose.model(groupSchema,'Group');
+
+export const Group = mongoose.model("Group",groupSchema);

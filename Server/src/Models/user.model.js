@@ -58,7 +58,7 @@ const userSchema = new Schema({
     timestamps:true
 })
 
-userSchema.index({userName:"text"})
+
 
 userSchema.pre("save",async function(next){
     if(!this.isModified("password")) return next();

@@ -6,6 +6,7 @@ import userRouter from "./Routes/user.route.js"
 import cookieParser from "cookie-parser"
 import {createServer} from "node:http"
 import {Server} from "socket.io"
+import searchRouter from "./Routes/Search/searching.route.js"
 dotenv.config({
     path:"./.env"
 })
@@ -26,7 +27,7 @@ app.use(cookieParser())
 // routing
 
 app.use("/chat-app/api/v1/user",userRouter)
-
+app.use("/chat-app/api/v1/SearchFriends",searchRouter)
 
 
 connectDB()
