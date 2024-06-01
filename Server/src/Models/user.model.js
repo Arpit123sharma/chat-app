@@ -53,7 +53,20 @@ const userSchema = new Schema({
                 default:Date.now
             }
         }
-    ]
+    ],
+    requestPendings:[{
+        To:{
+            type:Schema.Types.ObjectId,
+            ref:'User'
+        }
+    },],
+    requestsArrived:[{
+        From:{
+            type:Schema.Types.ObjectId,
+            ref:'User'
+        }
+    },],
+
 },{
     timestamps:true
 })
