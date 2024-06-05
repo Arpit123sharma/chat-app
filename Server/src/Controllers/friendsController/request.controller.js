@@ -3,7 +3,7 @@ import {ApiResponse} from "../../utils/ApiResponse.js"
 import { isValidObjectId } from "mongoose"
 
 
-const sendRequest = async(req,res)=>{
+const sendRequestToUser = async(req,res)=>{
     try {
         const {requestFrom} = req?.user?._id
         const {requestTo} = req?.params
@@ -26,23 +26,25 @@ const sendRequest = async(req,res)=>{
             validateBeforeSave:false
         })
 
-       const receiver = await User.findById(requestTo)
+            const receiver = await User.findById(requestTo)
 
-        if(!receiver) return res.status(400).json("receiver not exists")
+            if(!receiver) return res.status(400).json("receiver not exists")
+    
+            receiver.requestsArrived.push({From:sender?._id})
+    
+            await receiver.save({
+                validateBeforeSave:false
+            })
+    
+            return res.status(200).json(new ApiResponse("request send successfully !!",{},200))
+        
 
-        receiver.requestsArrived.push({From:sender?._id})
-
-        await receiver.save({
-            validateBeforeSave:false
-        })
-
-        return res.status(200).json(new ApiResponse("request send successfully !!",{},200))
     } catch (error) {
         return res.status(500).json(`something went wrong while sending FriendRequest to the user ERROR:${error}`)
     }
 }
 
-const cancelRequest = async(req,res)=>{
+const cancelRequestFromUser = async(req,res)=>{
     try {
         const{user} = req.params
 
@@ -119,7 +121,7 @@ const cancelRequest = async(req,res)=>{
     }
 }
 
-const acceptRequest = async(req,res)=>{
+const acceptRequestByUser = async(req,res)=>{
     try {
        const {requestFrom} = req.params
        const {requestTo} = req?.user?._id
@@ -163,8 +165,9 @@ const acceptRequest = async(req,res)=>{
     }
 }
 
+
 export {
-  sendRequest,
-  cancelRequest,
-  acceptRequest
+  sendRequestToUser,
+  cancelRequestFromUser,
+  acceptRequestByUser
  }

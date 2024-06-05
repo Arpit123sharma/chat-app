@@ -21,6 +21,22 @@ const groupSchema = new Schema({
                 default:Date.now
             }
         }
+    ],
+    requestPending:[
+        {
+            To:{
+                type:Schema.Types.ObjectId,
+                ref:'User'
+            }
+        }
+    ],
+    requestArrived:[
+        {
+            From:{
+                type:Schema.Types.ObjectId,
+                ref:'User'
+            }
+        }
     ]
 },{timestamps:true})
 
