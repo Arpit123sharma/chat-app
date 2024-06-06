@@ -3,9 +3,9 @@ import { sendRequestToUser,cancelRequestFromUser,acceptRequestByUser } from "../
 import { authMiddleware } from "../../Middlewares/Auth.middleware.js";
 
 const router = Router() 
-router.route("/sendRequest").get(authMiddleware,sendRequestToUser)
-router.route("/cancelRequest").get(authMiddleware,cancelRequestFromUser)
-router.route("/acceptRequest").get(authMiddleware,acceptRequestByUser)
+router.route("/sendRequest/:requestTo").get(authMiddleware,sendRequestToUser)
+router.route("/cancelRequest/:user/:requestTo").get(authMiddleware,cancelRequestFromUser)
+router.route("/acceptRequest/:requestFrom").get(authMiddleware,acceptRequestByUser)
 
 
 export default router

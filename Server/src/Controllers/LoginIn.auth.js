@@ -36,7 +36,7 @@ const loginInUser = async(req,res)=>{
             .json( new ApiError(500,"unable to generate the otp")) 
         }
 
-        const accessToken = await user.generateTokens("1h",{otp:otp})
+        const accessToken = await user.generateTokens("5h",{otp:otp})
 
         if (!accessToken) {
             return res.status(500)
