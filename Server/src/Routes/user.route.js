@@ -3,7 +3,7 @@ import { registerUser } from "../Controllers/registerUser.auth.js"
 import { upload } from "../Middlewares/multer.js"
 import { forgetPassword, loginInUser, otpVerification, regenerateAccessToken } from "../Controllers/LoginIn.auth.js"
 import {authMiddleware} from "../Middlewares/Auth.middleware.js"
-import { changePassword, deleteAccount, logoutUser, updateUser } from "../Controllers/manageUser.js"
+import { changePassword, deleteAccount, logoutUser, updateUser,getUserDetails } from "../Controllers/manageUser.js"
 
 
 const router = Router()
@@ -13,6 +13,7 @@ router.route("/login").post(loginInUser)// login make session
 router.route("/otpVerification").post(authMiddleware,otpVerification) // login 2 step verification (otp)
 router.route("/regenerateToken").get(regenerateAccessToken)
 router.route("/forgetPassword").post(forgetPassword)
+router.route("/profile").get(authMiddleware,getUserDetails)
 
 // profile edit routes
 

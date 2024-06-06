@@ -3,6 +3,15 @@ import {ApiResponse} from "../utils/ApiResponse.js"
 import { User } from "../Models/user.model.js"
 import { emailService } from "../utils/smsService.js"
 
+const getUserDetails = async(req,res)=>{
+  try {
+    const user = req?.user
+    return res.status(200).json(new ApiResponse(`successfully fetch user information`,user,200)) 
+  } catch (error) {
+     return res.status(500).json(new ApiError(500,`something went wrong while fetching user details :: ERROR : ${error}`))
+  }
+}
+
 const updateUser = async(req,res)=>{
     try {
        const {userName="",email=""} = req.body 
@@ -13,8 +22,8 @@ const updateUser = async(req,res)=>{
        let itemsToUpdate = {}
        const obj = {userName,email}
 
-      if(userName.trim()) itemsToUpdate={...itemsToUpdate,userName}
-      if(email.trim()) itemsToUpdate={...itemsToUpdate,email}
+      if(userName?.trim()) itemsToUpdate={...itemsToUpdate,userName}
+      if(email?.trim()) itemsToUpdate={...itemsToUpdate,email}
      
       
        const user = await User.findByIdAndUpdate(_id,{...itemsToUpdate},{
@@ -125,7 +134,8 @@ export {
   changePassword,
   deleteAccount,
   logoutUser,
-  updateUser
+  updateUser,
+  getUserDetails
 }
 
 
