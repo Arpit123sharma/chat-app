@@ -5,7 +5,7 @@ import cors from "cors"
 import userRouter from "./Routes/user.route.js"
 import cookieParser from "cookie-parser"
 import {createServer} from "node:http"
-import {Server} from "socket.io"
+import {WebSocketServer} from "ws"
 import searchRouter from "./Routes/Search/searching.route.js"
 import requestRoute from "./Routes/friends/request.route.js"
 import friendsRoute from "./Routes/friends/friend.routes.js"
@@ -17,7 +17,7 @@ const port = process.env.PORT || 3000
 
 const app = express()
 const server = createServer(app) 
-const io = new Server(server)
+const wss = new WebSocketServer({ server });
 
 
 app.use(cors())
@@ -44,4 +44,4 @@ connectDB()
     throw err;
 })
 
-export {io}
+export {wss}
