@@ -32,7 +32,7 @@ app.use("/chat-app/api/v1/user",userRouter)
 app.use("/chat-app/api/v1/SearchFriends",searchRouter)
 app.use("/chat-app/api/v1/requests",requestRoute)
 app.use("/chat-app/api/v1/Home",friendsRoute)
-
+app.use("/chat-app/api/v1/userDetails",userRouter)
 connectDB()
 .then(()=>{
     app.listen(port,()=>{
