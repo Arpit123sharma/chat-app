@@ -1,7 +1,7 @@
-import { ApiResponse } from "../../utils/ApiResponse"
-import { ApiError } from "../../utils/error"
+import { ApiResponse } from "../../utils/ApiResponse.js"
+import { ApiError } from "../../utils/error.js"
 
-const sendingRequestToConnect = async(_,res)=>{
+const sendingRequestToConnect = async(req,res)=>{
     try {
         const portNumber = process.env.portNumber
         if(!portNumber) return res.status(500).json(new ApiError(500,`something went wrong while fetching port number try after sometime `))
