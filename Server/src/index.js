@@ -1,6 +1,6 @@
 import dotenv from 'dotenv'
 import {connectDB} from "./DB/mongodb.connection.js"
-import { app } from './app.js'
+import { server } from './app.js'
 
 
 //env file configuration
@@ -13,7 +13,7 @@ const port = process.env.PORT || 3000
 //server is listing when DB is successfully connected !!
 connectDB()
 .then(()=>{
-    app.listen(port,()=>{
+    server.listen(port,()=>{
         console.log(`server is listing on ${port}`);
         console.log(`http://localhost:${port}`);
     })
