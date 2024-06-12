@@ -66,6 +66,12 @@ const userSchema = new Schema({
             ref:'User'
         }
     },],
+    pendingMessages:[{
+        message:{
+            type:Schema.Types.ObjectId,
+            ref:'Chat'
+        }
+    }]
 
 },{
     timestamps:true

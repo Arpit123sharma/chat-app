@@ -24,6 +24,7 @@ import searchRouter from "./Routes/Search/searching.route.js"
 import requestRoute from "./Routes/friends/request.route.js"
 import friendsRoute from "./Routes/friends/friend.routes.js"
 import wsRoute from "./Routes/messageRoutes/request.route.js"
+import { textMessageHandler } from "./Controllers/messageController/chat.controller.js"
 
 
 // routing decleration
@@ -34,34 +35,64 @@ app.use("/chat-app/api/v1/Home",friendsRoute) // fetching friend list using this
 app.use("/chat-app/api/v1/ws",wsRoute)// to take the port to connect with ws server
 
 //store the users in the map who are online 
-const onlineUsersList = new Map()
+const onlineUsersList = new Map();
 
-//web-socket server
-wss.on("connection",(ws,req)=>{
-    //parsing userId from the req parameters
-    const params = new URLSearchParams(req.url.split('?')[1])
-    const userID = params.get('id')
+// WebSocket server
+wss.on("connection", (ws, req) => {
+    // Parsing userId from the req parameters
+    const params = new URLSearchParams(req.url.split('?')[1]);
+    let userID = params.get('id');
 
     if (userID?.trim()) {
-        
-         onlineUsersList.set(userID,ws)
-         console.log(`user with this :${userID}, is successfully connected with the ws server !!`);
+        // Trim and ensure the userID is stored as a string
+        userID = userID.trim();
+        onlineUsersList.set(userID, ws);
+        console.log(`User with ID: ${userID} is successfully connected to the WebSocket server!`);
 
-         ws.on('message',(data)=>{
-            console.log(`get a message from the ${userID} , message is ${data}`);
-         })
+        ws.on('message', (data) => {
+            console.log(`Received a message from ${userID}, message is ${data}`);
+            ws.send(JSON.stringify({
+                type:"A-S",
+                status : true
+            }))
+            let parseData
+            try {
+                parseData = JSON.parse(data)
+                
+            } catch (error) {
+                console.log("error during parsing data into json: ",error);
+            }
+            if (parseData.payloadType === 'Text') {
+                    //text-message-handler
+                    textMessageHandler(ws,parseData,onlineUsersList) 
+            }else if(parseData.payloadType === 'File'){
+                   //File-type-message-controller
+            }
+            
+        });
 
-         ws.on('close',()=>{
-            onlineUsersList.delete(userID)
-            console.log(`user disconnected from the server with this userId :${userID}`);
-         })
-
+        ws.on('close', () => {
+            onlineUsersList.delete(userID);
+            console.log(`User disconnected from the server with ID: ${userID}`);
+        });
     } else {
-        ws.close(1008,"userID is required to connect with the server")
+        ws.close(1008, "UserID is required to connect to the server");
     }
-})
+});
+
 
 export {
     app,
     server
 }
+
+// Step-by-step communication between both clients is as follows:
+
+// User A and User B create a communication channel with the chat server.
+// User A sends a message to the chat server.
+// When a message is received, the chat server acknowledges back to user A.
+// The chat server sends the message to user B and stores the message in the database if the receiver’s status is offline.
+// User B sends an acknowledgment to the chat server.
+// The chat server notifies user A that the message has been successfully delivered.
+// When user B reads the message, the application notifies the chat server.
+// The chat server notifies user A that user B has read the message.

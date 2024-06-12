@@ -2,30 +2,44 @@ import mongoose,{Schema} from "mongoose"
 
 
 const chatSchema = Schema({
-    source:{
+    From:{
         type:Schema.Types.ObjectId,
         ref:'User'
     },
-    payload:{
+    Payload:{
         type:String,
         required:true
     },
-    destination:{
+    To:{
         type:Schema.Types.ObjectId,
         ref:'User'
     },
-    time:{
+    Time:{
         type:String,
-        required:true
     },
-    mssgStatus:{
-        type:Boolean
+    Read : {
+        type:Boolean,
+        default:false
     },
-    readStatus : {
-        type:Boolean
-    }
+    Delivered : {
+        type:Boolean,
+        default:false
+    },
+    PayloadType: String
 },{
     timestamps:true
 })
 
+/*
+{ chat give by client:-
+ 
+ from,
+ to,
+ payload,
+ time,
+ payloadType = normal || file,
+ recivier:'individual' || group
+
+}
+*/
 export const Chat = mongoose.model("Chat",chatSchema)
