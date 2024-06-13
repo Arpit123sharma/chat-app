@@ -1,7 +1,7 @@
 import mongoose,{Schema} from "mongoose"
 
 
-const chatSchema = Schema({
+const chatSchema = new Schema({
     From:{
         type:Schema.Types.ObjectId,
         ref:'User'

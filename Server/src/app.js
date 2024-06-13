@@ -24,7 +24,7 @@ import searchRouter from "./Routes/Search/searching.route.js"
 import requestRoute from "./Routes/friends/request.route.js"
 import friendsRoute from "./Routes/friends/friend.routes.js"
 import wsRoute from "./Routes/messageRoutes/request.route.js"
-import { textMessageHandler } from "./Controllers/messageController/chat.controller.js"
+import {  textMessageHandlerForGroup, textMessageHandlerForIndi } from "./Controllers/messageController/chat.controller.js"
 
 
 // routing decleration
@@ -62,10 +62,16 @@ wss.on("connection", (ws, req) => {
             } catch (error) {
                 console.log("error during parsing data into json: ",error);
             }
-            if (parseData.payloadType === 'Text') {
-                    //text-message-handler
-                    textMessageHandler(ws,parseData,onlineUsersList) 
-            }else if(parseData.payloadType === 'File'){
+            if (parseData.payloadType === 'Text' && parseData.receiver === 'individual') {
+                    //text-message-handler-individual-user
+                    textMessageHandlerForIndi(ws,parseData,onlineUsersList) 
+            }
+            else if(parseData.payloadType === 'Text' && parseData.receiver === 'group'){
+                //text-message-handler-individual-group
+                textMessageHandlerForGroup(ws,parseData,onlineUsersList)
+
+            }
+            else if(parseData.payloadType === 'File'){
                    //File-type-message-controller
             }
             
