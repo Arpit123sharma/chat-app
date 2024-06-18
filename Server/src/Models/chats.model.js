@@ -37,9 +37,7 @@ const chatSchema = new Schema({
  to,
  payload,
  time,
- payloadType = normal || file,
  recivier:'individual' || group
-
 }
 */
 export const Chat = mongoose.model("Chat",chatSchema)

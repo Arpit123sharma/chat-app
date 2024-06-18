@@ -24,6 +24,7 @@ import searchRouter from "./Routes/Search/searching.route.js"
 import requestRoute from "./Routes/friends/request.route.js"
 import friendsRoute from "./Routes/friends/friend.routes.js"
 import wsRoute from "./Routes/messageRoutes/request.route.js"
+import fileMessageRoute from "./Routes/messageRoutes/chat.route.js"
 import {  textMessageHandlerForGroup, textMessageHandlerForIndi } from "./Controllers/messageController/chat.controller.js"
 
 
@@ -33,6 +34,7 @@ app.use("/chat-app/api/v1/SearchFriends",searchRouter) // searching for friends
 app.use("/chat-app/api/v1/requests",requestRoute) // route for sending friend request and cancelling ,acceptance
 app.use("/chat-app/api/v1/Home",friendsRoute) // fetching friend list using this route
 app.use("/chat-app/api/v1/ws",wsRoute)// to take the port to connect with ws server
+app.use("/chat-app/api/v1/ws-message",fileMessageRoute)
 
 //store the users in the map who are online 
 const onlineUsersList = new Map();
@@ -62,18 +64,16 @@ wss.on("connection", (ws, req) => {
             } catch (error) {
                 console.log("error during parsing data into json: ",error);
             }
-            if (parseData.payloadType === 'Text' && parseData.receiver === 'individual') {
-                    //text-message-handler-individual-user
+            if ( parseData.receiver === 'individual') {
+                    //message-handler-individual-user
                     textMessageHandlerForIndi(ws,parseData,onlineUsersList) 
             }
-            else if(parseData.payloadType === 'Text' && parseData.receiver === 'group'){
-                //text-message-handler-individual-group
+            else if(parseData.receiver === 'group'){
+                //message-handler-individual-group
                 textMessageHandlerForGroup(ws,parseData,onlineUsersList)
 
             }
-            else if(parseData.payloadType === 'File'){
-                   //File-type-message-controller
-            }
+            
             
         });
 

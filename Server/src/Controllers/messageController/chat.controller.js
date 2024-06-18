@@ -2,6 +2,8 @@ import { ApiError } from "../../utils/error.js"
 import {User} from "../../Models/user.model.js"
 import {Chat} from "../../Models/chats.model.js"
 import { Group } from "../../Models/group.model.js"
+import { uploadOnCloudinary } from "../../utils/cloudinary.js"
+import { ApiResponse } from "../../utils/ApiResponse.js"
 
 
 const textMessageHandlerForIndi = async(ws,message,onlineUsers)=>{
@@ -99,7 +101,28 @@ const textMessageHandlerForGroup = async(ws,message,onlineUsers)=>{
   }
 }
 
+const fileHandler = async(req,res)=>{
+  try {
+    const filePath = req?.file?.filePath
+    if (!filePath) {
+      return res.status(400).json(new ApiError(400,`cant find the file message you sent!!! `))
+    }
+
+    const uploadedFile = await uploadOnCloudinary(filePath)
+    
+    if (!uploadedFile) {
+      return res.status(500).json(new ApiError(500,`not able to save message in cloud try after sometime `))
+    }
+
+    return res.status(200).json(new ApiResponse("successfully upload the file you send!!",{url:uploadedFile?.url},200))
+    
+  } catch (error) {
+    return res.status(500).json(new ApiError(500,`something went wrong during file handling ${error}`))
+  }
+}
+
 export{
     textMessageHandlerForIndi,
-    textMessageHandlerForGroup
+    textMessageHandlerForGroup,
+    fileHandler
 }
