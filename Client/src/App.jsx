@@ -1,11 +1,12 @@
 import './App.css'
+import Signup from './pages/signup'
 
 function App() {
   
 
   return (
     <>
-      <h1 className='bg-green-400'>chat-app</h1>
+      <h1>chat-app</h1>
     </>
   )
 }
