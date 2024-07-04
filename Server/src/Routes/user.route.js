@@ -8,7 +8,7 @@ import { changePassword, deleteAccount, logoutUser, updateUser,getUserDetails } 
 
 const router = Router()
 // gneral routing
-router.route("/register").post(upload.single("profile"),registerUser) // signup
+router.route("/register").post(registerUser) // signup
 router.route("/login").post(loginInUser)// login make session
 router.route("/otpVerification").post(authMiddleware,otpVerification) // login 2 step verification (otp)
 router.route("/regenerateToken").get(regenerateAccessToken)

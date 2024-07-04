@@ -1,9 +1,10 @@
-//import  ApiResponse}m "../utils/error.js"
 import{User}  from "../Models/user.model.js"
 import { uploadOnCloudinary } from "../utils/cloudinary.js"
 import {ApiResponse} from "../utils/ApiResponse.js"
 import { emailService } from "../utils/smsService.js"
 import { ApiError } from "../utils/error.js"
+
+
 const registerUser = async(req,res)=>{
     try {
        const{userName,password,phone,email} =  req.body
@@ -12,6 +13,12 @@ const registerUser = async(req,res)=>{
          return res.status(400)
          .json(new ApiError(400,"every feild is required !!"))
        }
+       const userNameAlreadyExists = await User.findOne({userName:userName})
+
+       if (userNameAlreadyExists) {
+        return res.status(400).json( new ApiError(400,"user name already exists try with another user name "));
+       }
+
        const userAlreadyExists = await User.findOne({
          $or : [{email},{phone}]
        })
@@ -19,24 +26,13 @@ const registerUser = async(req,res)=>{
        if (userAlreadyExists) {
         return res.status(400).json( new ApiError(400,"user with the same email or phone already exists"));
        }
-      //  console.log(req.file);
-       const profilePicturePath = req.file?.path
-       
-       if (!profilePicturePath) {
-        return res.status(400).json( new ApiError(400,"did,nt find the file"));
-       }
-
-       const isImageUploaded = await uploadOnCloudinary(profilePicturePath)
-
-       if (!isImageUploaded) {
-        return res.status(500).json( new ApiError(500,"something went wrong while registering user(photo uploading) try after sometime"));
-}
+      
+      
        
        const createdUser = await User.create({
          userName,
          email,
          phone,
-         dp: isImageUploaded?.url,
          password
        })
        

@@ -43,13 +43,13 @@ const loginInUser = async(req,res)=>{
             .json( new ApiError(500,"unable to generate the accessToken"))  
         }
 
-        
-        return res.status(200)
-        
-        .cookie("accessToken",accessToken,{
-            httpOnly:true,
-            secure:true
+        res.cookie("accessToken",accessToken,{
+            httpOnly: true,
+            sameSite: 'None', secure: true,
+            maxAge: 24 * 60 * 60 * 1000
         })
+        
+        return res.status(200)    
         .json(
             new ApiResponse("user verified successfully :: otp and token send successfully",{},200)
         )

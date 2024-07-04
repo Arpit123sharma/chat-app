@@ -2,6 +2,7 @@ import {ApiError} from "../utils/error.js"
 import {User} from "../Models/user.model.js"
 import jwt from "jsonwebtoken"
 const authMiddleware = async(req,res,next)=>{
+    console.log(req.cookies);
     try {
        const accessToken = req.cookies?.accessToken || ""
        

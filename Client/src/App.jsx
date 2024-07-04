@@ -1,12 +1,25 @@
 import './App.css'
-import Signup from './pages/signup'
-
+import { useNavigate } from 'react-router-dom';
+import {Button} from "@nextui-org/react";
 function App() {
-  
+  const navigate = useNavigate()
 
   return (
     <>
-      <h1>chat-app</h1>
+      <div className='flex gap-10'>
+        <h1 className='text-center'>Home</h1>
+        <Button onClick={()=>{
+          navigate("/signup")
+        }}>
+          signup
+        </Button>
+
+        <Button onClick={()=>{
+          navigate("/login")
+        }}>
+          login
+        </Button>
+      </div>
     </>
   )
 }
