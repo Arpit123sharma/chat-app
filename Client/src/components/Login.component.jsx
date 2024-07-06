@@ -1,5 +1,4 @@
 import React,{useState} from 'react'
-import {useCookies} from "react-cookie"
 import { Input,Button } from '@nextui-org/react'
 import { Link ,useNavigate} from 'react-router-dom'
 import { useForm } from 'react-hook-form'
@@ -34,10 +33,12 @@ function LoginComponent() {
         }
    
 
-        let response = await axios.post(`${apiUrl}/user/login`,modifyData)
+        let response = await axios.post(`${apiUrl}/user/login`,modifyData,{
+          withCredentials:true
+        })
         setLoading(false)
         console.log(modifyData);
-        
+        console.log(response);
         navigate("/otpVerification")
         
 

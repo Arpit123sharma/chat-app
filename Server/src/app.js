@@ -10,11 +10,20 @@ const server = createServer(app)
 const wss = new WebSocketServer({ server }); //web socket server 
 
 //middlewares configuration of nodejs server
-app.use(cors({
-    origin:"http://localhost:5173",
-    credentials:true
-}
-))
+const allowedOrigins = ["http://localhost:5173"];
+
+app.use(
+    cors({
+        origin: (origin, callback) => {
+            if (allowedOrigins.includes(origin)) {
+                callback(null, true);
+            } else {
+                callback(new Error("Not allowed by CORS"));
+            }
+        },
+        credentials: true,
+    })
+);
 app.use(express.json())
 app.use(express.urlencoded({
     extended:true

@@ -43,11 +43,12 @@ const loginInUser = async(req,res)=>{
             .json( new ApiError(500,"unable to generate the accessToken"))  
         }
 
-        res.cookie("accessToken",accessToken,{
+        res.cookie("accessToken", accessToken, {
             httpOnly: true,
-            sameSite: 'None', secure: true,
-            maxAge: 24 * 60 * 60 * 1000
-        })
+            sameSite: 'none',
+            secure: true,
+            maxAge: 24 * 60 * 60 * 1000 // 1 day
+        });
         
         return res.status(200)    
         .json(
