@@ -9,6 +9,8 @@ import App from './App'
 import Signup from './pages/signup'
 import Login from './pages/Login'
 import Otp from './pages/Otp'
+import Chat from './pages/Chat'
+import MessageComponent from './components/messageComponent'
 import './index.css'
 
 const router = createBrowserRouter([
@@ -27,8 +29,15 @@ const router = createBrowserRouter([
   },
   {
     path:"/otpVerification",
-    element:<Otp />,
-    
+    element:<Otp />,    
+  },
+  {
+    path:"/chats",
+    element:<Chat />,    
+    children:[{
+      path:"/chats/",
+      element:<MessageComponent />,  
+    },]
   },
 
 ])

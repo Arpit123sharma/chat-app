@@ -1,6 +1,6 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { useForm, Controller } from 'react-hook-form';
-import {useDispatch} from "react-redux"
+import {useDispatch,useSelector} from "react-redux"
 import {login,logout} from "../store/authSlice.js"
 import {useNavigate} from "react-router-dom"
 import { Input, Button } from '@nextui-org/react';
@@ -12,7 +12,7 @@ import axios from "axios"
         const [loading,setLoading] = useState(false)
         const dispatch = useDispatch()
         const navigate = useNavigate()
-      
+        
         const onSubmit = async(data) => {
             try {
                 setLoading(true)
@@ -26,12 +26,17 @@ import axios from "axios"
                     withCredentials: true
                 });
                 console.log(response);
+                
                 dispatch(login({
-                    userName:response?.data?.data?.userName,
-                    dp:response?.data?.data?.dp
-                }))
+                  userData: {
+                    userName: response?.data?.data?.userData?.userName,
+                    dp: response?.data?.data?.userData?.dp
+                  }
+                }));
                 setLoading(false)
-                navigate("/chat-room")
+                console.log(response?.data?.data?.userData?.userName , response?.data?.data?.userData?.dp);
+                //console.log(user);
+                navigate("/chats")
 
             } catch (error) {
                 dispatch(logout())

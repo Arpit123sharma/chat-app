@@ -93,7 +93,7 @@ const otpVerification = async(req,res)=>{
             throw new ApiError(400,"user not finded")
         }
 
-        const accessToken = await userFromDB.generateTokens("1h",{
+        const accessToken = await userFromDB.generateTokens("1d",{
             userName:user.userName,
             email:user.email,
         })

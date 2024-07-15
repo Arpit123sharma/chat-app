@@ -5,8 +5,8 @@ import { ApiError } from "../../utils/error.js"
 
 const Searching = async(req,res)=>{
   try {
-    const {query,page,limit = 10,queryFor} = req.query
-    if (!query.trim() || !page.trim() || !queryFor.trim()) {
+    const {query,page=1,limit = 10,queryFor="users"} = req.query
+    if (!query.trim() || !page || !queryFor.trim()) {
       return res.status(400).json(new ApiError(400,"query and page and queryFor is required "))
     }
 
