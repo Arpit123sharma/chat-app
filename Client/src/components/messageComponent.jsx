@@ -19,7 +19,7 @@ function MessageComponent() {
           </div>
        </div>
        <div className='w-full h-full '>
-         <Searching />
+         {search ? (<Searching />) :(<div></div>)}
        </div>
     </div>
   )

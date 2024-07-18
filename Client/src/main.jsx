@@ -12,6 +12,7 @@ import Otp from './pages/Otp'
 import Chat from './pages/Chat'
 import MessageComponent from './components/messageComponent'
 import './index.css'
+import RequestComponent from './components/request'
 
 const router = createBrowserRouter([
   {
@@ -37,7 +38,12 @@ const router = createBrowserRouter([
     children:[{
       path:"/chats/",
       element:<MessageComponent />,  
-    },]
+    },
+    {
+      path:"/chats/requests",
+      element:<RequestComponent />,  
+    },
+  ]
   },
 
 ])

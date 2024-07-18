@@ -13,9 +13,12 @@ const ApiHandler=(url,method,dependencies=[])=>{
         try {
             setError("")
             setLoading(true)
+            if (value) {
+                url = url+value
+            }
             const res = await axios({
                 method:method,
-                url:url+value,
+                url:url,
                 withCredentials:true,
                 signal:controller.signal
             })

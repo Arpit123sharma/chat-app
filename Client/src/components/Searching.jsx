@@ -61,7 +61,7 @@ function Searching() {
               !loading && !error && (<h2>No users found</h2>)
             ) : (
               users.map((user, index) => (
-                <UserComponent avatar={user.dp} userName={user.userName} key={index} />
+                <UserComponent avatar={user.dp} userName={user.userName} key={index}  _id={user._id}/>
               ))
             )
           }

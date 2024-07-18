@@ -2,6 +2,7 @@ import { User } from "../../Models/user.model.js"
 import {ApiResponse} from "../../utils/ApiResponse.js"
 import { isValidObjectId } from "mongoose"
 import { ApiError } from "../../utils/error.js";
+import mongoose from "mongoose";
 
 
 const sendRequestToUser = async(req,res)=>{
@@ -156,7 +157,7 @@ const acceptRequestByUser = async(req,res)=>{ // request was accept by the recei
 
         sender.friends.push({friendId:requestTo})
 
-        sender.requestsArrived.pull({From:requestTo})
+        sender.requestPendings.pull({From:requestTo})
 
         await sender.save({
             validateBeforeSave:false
@@ -169,9 +170,85 @@ const acceptRequestByUser = async(req,res)=>{ // request was accept by the recei
     }
 }
 
+const allRequestOfUser = async (req, res) => {
+    try {
+        const userID = req?.user?._id;
+
+        const user = await User.aggregate([
+            { $match: { _id: new mongoose.Types.ObjectId(userID) } },
+            {
+                $lookup: {
+                    from: 'users',
+                    localField: 'requestPendings.To',
+                    foreignField: '_id',
+                    as: 'requestPendingsDetails',
+                    pipeline: [
+                        { $project: { _id: 1, userName: 1, dp: 1, email: 1, createdAt: 1 } }
+                    ]
+                }
+            },
+            {
+                $lookup: {
+                    from: 'users',
+                    localField: 'requestsArrived.From',
+                    foreignField: '_id',
+                    as: 'requestsArrivedDetails',
+                    pipeline: [
+                        { $project: { _id: 1, userName: 1, dp: 1, email: 1, createdAt: 1 } }
+                    ]
+                }
+            },
+            {
+                $project: {
+                    requestPendings: {
+                        $map: {
+                            input: "$requestPendings",
+                            as: "pending",
+                            in: {
+                                _id: "$$pending._id",
+                                To: {
+                                    $arrayElemAt: [
+                                        "$requestPendingsDetails",
+                                        { $indexOfArray: ["$requestPendingsDetails._id", "$$pending.To"] }
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    requestsArrived: {
+                        $map: {
+                            input: "$requestsArrived",
+                            as: "arrived",
+                            in: {
+                                _id: "$$arrived._id",
+                                From: {
+                                    $arrayElemAt: [
+                                        "$requestsArrivedDetails",
+                                        { $indexOfArray: ["$requestsArrivedDetails._id", "$$arrived.From"] }
+                                    ]
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        ]);
+
+        if (!user || user.length === 0) {
+            return res.status(500).json(new ApiError(500, "User not found !!"));
+        }
+
+        return res.status(200).json(new ApiResponse("Successfully fetched request pending and arrived", user[0], 200));
+    } catch (error) {
+        return res.status(500).json(new ApiError(500, `Something went wrong while fetching FriendRequest of the user ERROR: ${error}`));
+    }
+}
+
+
 
 export {
   sendRequestToUser,
   cancelRequestFromUser,
-  acceptRequestByUser
+  acceptRequestByUser,
+  allRequestOfUser
  }
