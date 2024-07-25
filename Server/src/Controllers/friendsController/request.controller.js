@@ -48,33 +48,30 @@ const sendRequestToUser = async(req,res)=>{
     }
 }
 
-const cancelRequestFromUser = async(req,res)=>{
+const cancelRequestFromSender = async(req,res)=>{
     try {
-        const{user} = req?.params
-        if (!user) return res.status(400).json(new ApiError(400,"pls tell who is cancelling the request"))
+        
+            const senderID = req?.user?._id
+            const {receiverID} = req?.params
 
-        if(user === "sender"){ // this part works when cancellation request goes from sender who sends the request
-            const requestFrom = req?.user?._id
-            const {requestTo} = req?.params
-
-            if (!requestTo.trim()) {
-                return res.status(400).json(new ApiError(400,`id of user required you are sending the friend request to !!`))
+            if (!receiverID.trim()) {
+                return res.status(400).json(new ApiError(400,`id of user required for cancelling the friend request to !!`))
             }
     
-            if(!isValidObjectId(requestTo)){
+            if(!isValidObjectId(receiverID)){
                 return res.status(401).json(new ApiError(401,`pls give the valid mongodb id !!!`))
             }
     
-            const sender =  await User.findById(requestFrom)
+            const sender =  await User.findById(senderID)
     
             if(!sender) return res.status(400).json(new ApiError(400,`sender not exists!!!`))
     
-            sender.requestPendings.pull({To:requestTo})
+            sender.requestPendings.pull({To:receiverID})
             await sender.save({
                 validateBeforeSave:false
             })
     
-            const receiver = await User.findById(requestTo)
+            const receiver = await User.findById(receiverID)
     
             if(!receiver) return res.status(400).json(new ApiError(400,`receiver not exists!!!`))
     
@@ -85,47 +82,50 @@ const cancelRequestFromUser = async(req,res)=>{
             })
     
             return res.status(200).json(new ApiResponse("request cancel successfully !!",{},200))
-        }else{ // this part when cancellation request goes from receiver
-
-            const requestFrom = req?.user?._id // this is the recivers id don't get confused by the name requestFrom
-            const {requestTo} = req?.params // this is the id of the sender who sends the request to the receiver don't get confused by the name requestTo
-
-            if (!requestTo?.trim()) {
-                return res.status(400).json(new ApiError(400,`id of user required you are sending the friend request to !!`))
-            }
-    
-            if(!isValidObjectId(requestTo)){
-                return res.status(401).json(new ApiError(401,`pls give the valid mongodb id !!!`))
-            }
-    
-            const sender =  await User.findById(requestTo)
-    
-            if(!sender) return res.status(400).json(new ApiError(400,"sender not exists")) // in this sender who is the person who sends friend request i.e. requestTo
-    
-            sender.requestPendings.pull({To:requestFrom})
-            await sender.save({
-                validateBeforeSave:false
-            })
-    
-            const receiver = await User.findById(requestFrom)
-    
-            if(!receiver) return res.status(400).json(new ApiError(400,"sender not exists")) // in this case receiver is the person who is sending the cancelling request i.e. requestFrom
-    
-            receiver.requestsArrived.pull({From:requestTo})
-    
-            await receiver.save({
-                validateBeforeSave:false
-            })
-    
-            return res.status(200).json(new ApiResponse("request rejected successfully !!",{},200))
-        }
-
+        
 
     } catch (error) {
         return res.status(500).json(new ApiError(500,`something went wrong while cancelling FriendRequest of the user ERROR:${error}`))
     }
 }
 
+const cancelRequestFromReceiver = async(req,res)=>{
+    try {
+        const receiverID = req?.user?._id
+        const {senderID} = req?.params
+
+        if (!senderID?.trim()) {
+            return res.status(400).json(new ApiError(400,`id of sender required  during deleting friend request !!`))
+        }
+
+        if(!isValidObjectId(senderID)){
+            return res.status(401).json(new ApiError(401,`pls give the valid mongodb id !!!`))
+        }
+
+        const sender =  await User.findById(senderID)
+    
+        if(!sender) return res.status(400).json(new ApiError(400,"sender not exists"))
+        
+        sender.requestPendings.pull({To:receiverID})
+        await sender.save({
+            validateBeforeSave:false
+        })
+
+        const receiver =  await User.findById(receiverID)
+    
+        if(!receiver) return res.status(400).json(new ApiError(400,"receiver not exists"))
+        
+        sender.requestsArrived.pull({From:senderID})
+        await sender.save({
+            validateBeforeSave:false
+        })
+        
+        return res.status(200).json(new ApiResponse("request rejected successfully !!",{},200))
+
+    } catch (error) {
+        return res.status(500).json(new ApiError(500,`something went wrong while cancelling FriendRequest of the user ERROR:${error}`)) 
+    }
+}
 const acceptRequestByUser = async(req,res)=>{ // request was accept by the receiver i.e. we are taking requestFrom params
     try {
        const {requestFrom} = req?.params
@@ -248,7 +248,8 @@ const allRequestOfUser = async (req, res) => {
 
 export {
   sendRequestToUser,
-  cancelRequestFromUser,
+  cancelRequestFromSender,
+  cancelRequestFromReceiver,
   acceptRequestByUser,
   allRequestOfUser
  }

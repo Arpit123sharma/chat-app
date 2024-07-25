@@ -31,7 +31,7 @@ function RequestComponent() {
                     <div>
                         
                         <div className='w-full h-auto  flex flex-col gap-3 items-center pt-7'>
-                            {arrived?.length !== 0 && arrived.map((user, index) => (
+                            {arrived?.length !== 0 &&( arrived.map((user, index) => (
                                 user.From ? (
                                     <UserComponent
                                         avatar={user.From.dp}
@@ -49,7 +49,7 @@ function RequestComponent() {
                                 ) : (
                                     <p key={index} className='text-red-500'>Invalid user data</p>
                                 )
-                            ))}
+                            )))}
 
                             {pending?.length !== 0 && pending.map((user, index) => (
                                 user.To ? (
@@ -69,11 +69,15 @@ function RequestComponent() {
                                     <p key={index} className='text-red-500'>Invalid user data</p>
                                 )
                             ))}
+
+                            {(arrived?.length == 0 && pending?.length == 0) ?(
+                                <h1 className='text-white font-semibold text-2xl'>you have no request in the request box !!</h1>
+                            ):(null)}
                         </div>
                     </div>
                 )}
             </div>
-            <div className='w-6/12 h-full bg-red-500'>
+            <div className='w-6/12 h-full'>
                {profile && <Profile profileData={profileData}/>}
             </div>
         </div>

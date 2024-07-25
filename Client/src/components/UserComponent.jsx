@@ -3,7 +3,7 @@ import { Avatar, Button,Badge} from '@nextui-org/react';
 import {NotificationIcon} from "../utils/NotificationIcon";
 import axios from 'axios';
 
-function UserComponent({ avatar, userName, _id, displayState="",text="",color="",onClick }) {
+function UserComponent({ avatar, userName, _id, displayState="",onClick }) {
   const [error, setError] = useState('');
   const [cancelRequest, setCancelRequest] = useState(false);
    
@@ -57,6 +57,11 @@ function UserComponent({ avatar, userName, _id, displayState="",text="",color=""
               showFallback
             />
           </Badge>
+        )
+      }
+      {
+        displayState === "button" && (
+          <Avatar isBordered color="danger" src={avatar} showFallback/>
         )
       }
         <h2 className='text-white font-medium text-lg'>{userName}</h2>
