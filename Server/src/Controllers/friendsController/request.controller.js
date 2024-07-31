@@ -115,8 +115,8 @@ const cancelRequestFromReceiver = async(req,res)=>{
     
         if(!receiver) return res.status(400).json(new ApiError(400,"receiver not exists"))
         
-        sender.requestsArrived.pull({From:senderID})
-        await sender.save({
+        receiver.requestsArrived.pull({From:sender?._id})
+        await receiver.save({
             validateBeforeSave:false
         })
         

@@ -6,7 +6,21 @@ import { useEffect,useState } from 'react';
 import axios from "axios"
 function App() {
   const navigate = useNavigate()
+  
+  useEffect(()=>{
+    ;(
+      async()=>{
+        try {
+          const response = await axios.get(`${import.meta.env.VITE_API_URL_HEADER}/user/regenerateToken`,{
+            withCredentials:true
+          })
 
+        } catch (error) {
+          console.log(error);
+        }
+      }
+    )()
+  },[])
   return (
     
     <>

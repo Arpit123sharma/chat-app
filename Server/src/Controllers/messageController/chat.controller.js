@@ -26,10 +26,28 @@ const textMessageHandlerForIndi = async(ws,message,onlineUsers)=>{
              Delivered:true,
              PayloadType:message.payloadType
            })
-           return
+           //updating the friend list
+           const sender = await User.findById(senderID)
+           const receiver = await User.findById(receiverID)
+
+           const senderListIndex = sender.friends.findIndex(friend=>friend.friendId === receiverID)
+           const receiverListIndex = receiver.friends.findIndex(friend=>friend.friendId === senderID)
+
+           if (senderListIndex !== -1 && receiverListIndex !== -1) {
+
+             sender.friends[senderListIndex].lastMessage = Date.now()
+             receiver.friends[receiverListIndex].lastMessage = Date.now()
+
+             sender.friends.sort((a,b)=>(b.lastMessage - a.lastMessage))
+             receiver.friends.sort((a,b)=>(b.lastMessage - a.lastMessage))
+
+           }
+           await sender.save({validateBeforeSave:false})
+           await receiver.save({validateBeforeSave:false})
+
+           return [sender.friends,receiver.friends]
         }
         else{ // for offline user
-            const senderID = message.from
             const wsConnectionForSend = onlineUsers.get(senderID.trim())
             wsConnectionForSend.send(JSON.stringify({type:'A-D',status:false}))
             const savedMessage = await Chat.create({
@@ -49,7 +67,27 @@ const textMessageHandlerForIndi = async(ws,message,onlineUsers)=>{
             await user.save({
                 validateBeforeSave:false
             })
-              return
+            // updating friend list 
+
+            const sender = await User.findById(senderID)
+            const receiver = user
+
+            const senderListIndex = sender.friends.findIndex(friend=>friend.friendId === receiver?._id)
+            const receiverListIndex = receiver.friends.findIndex(friend=>friend.friendId === senderID)
+
+            if (senderListIndex !== -1 && receiverListIndex !== -1) {
+
+              sender.friends[senderListIndex].lastMessage = Date.now()
+              receiver.friends[receiverListIndex].lastMessage = Date.now()
+
+              sender.friends.sort((a,b)=>(b.lastMessage - a.lastMessage))
+              receiver.friends.sort((a,b)=>(b.lastMessage - a.lastMessage))
+
+            }
+            await sender.save({validateBeforeSave:false})
+            await receiver.save({validateBeforeSave:false})
+
+            return [sender.friends,receiver.friends]
         }  
    } catch (error) {
      ws.send(JSON.stringify(new ApiError(500,`something went wrong while handling message from the user::ERROR:${error}`)))

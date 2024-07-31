@@ -6,7 +6,7 @@ import axios from 'axios';
 function UserComponent({ avatar, userName, _id, displayState="",onClick }) {
   const [error, setError] = useState('');
   const [cancelRequest, setCancelRequest] = useState(false);
-   
+  const colorArray = ["primary","secondary","success","warning","danger"]
 
   const sendRequest = async (receiversID = _id) => {
     try {
@@ -64,6 +64,11 @@ function UserComponent({ avatar, userName, _id, displayState="",onClick }) {
           <Avatar isBordered color="danger" src={avatar} showFallback/>
         )
       }
+      {
+        displayState === "text" && (
+          <Avatar isBordered color={colorArray[Math.floor(Math.random()*5 )]} src={avatar} showFallback />
+        )
+      }
         <h2 className='text-white font-medium text-lg'>{userName}</h2>
       </div>
       {
@@ -77,6 +82,12 @@ function UserComponent({ avatar, userName, _id, displayState="",onClick }) {
           )
           
         )      
+      }
+
+      {
+        displayState === "text" && (
+          null
+        )
       }
       
     </div>

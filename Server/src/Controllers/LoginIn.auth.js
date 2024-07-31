@@ -128,7 +128,8 @@ const otpVerification = async(req,res)=>{
 
 const regenerateAccessToken = async(req,res)=>{
     try {
-         const refreshToken = req.cookies?.refreshToken || ""
+         const refreshToken = req?.cookies?.refreshToken || ""
+         console.log(req?.cookies?.accessToken);
          if (!refreshToken) {
             return res.status(500).json( new ApiError(500,"refresh token is required"));
          }

@@ -1,24 +1,16 @@
 import { User } from "../../Models/user.model.js"
 import {ApiResponse} from "../../utils/ApiResponse.js"
-
+import mongoose from "mongoose"
 
 const userFriendList = async(req,res)=>{
     try {
-       const {user} = req?.user
-       const friendsList = await User.aggregate([
-        {
-            $match:{_id:user?._id}
-        },
-        {
-            $project:{
-                friends:{
-                    _id:1,
-                    userName:1,
-                    dp:1
-                }
-            }
-        }
-       ])
+       const user = req?.user
+       const friendsList =  await User.findById(user?._id)
+       .select("friends")
+       .populate({
+         path: 'friends.friendId', // Path to populate
+         select: 'userName email dp createdAt' // Fields to include from friends
+       });
 
        if(friendsList.length === 0){
         return res.status(500).json(`user don't have friends !!`)

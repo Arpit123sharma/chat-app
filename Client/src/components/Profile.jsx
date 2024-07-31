@@ -30,7 +30,7 @@ function Profile({
                      }}>Accept</Button>
                    ):(null)
                    }
-                   <Button isIconOnly color="warning" aria-label="delet">
+                   <Button isIconOnly color="warning" >
                        <MdDeleteOutline className='text-lg' onClick={()=>{
                           if (profileData?.requestType === "Arrived") {
                             setValue(`cancelRequest/fromReceiver/${profileData?.userID}`)

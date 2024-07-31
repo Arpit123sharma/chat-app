@@ -33,6 +33,8 @@ import axios from "axios"
                     dp: response?.data?.data?.userData?.dp
                   }
                 }));
+
+                console.log("data set");
                 setLoading(false)
                 console.log(response?.data?.data?.userData?.userName , response?.data?.data?.userData?.dp);
                 //console.log(user);

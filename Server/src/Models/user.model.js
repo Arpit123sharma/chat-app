@@ -38,6 +38,9 @@ const userSchema = new Schema({
         friendSince:{
             type:Date,
             default:Date.now
+        },
+        lastMessage:{
+            type:Date,
         }
 
      }
