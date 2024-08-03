@@ -3,6 +3,7 @@ import SideBar from './SideBar';
 import { Outlet } from 'react-router-dom';
 import { useSelector , useDispatch} from 'react-redux';
 import { login } from '../store/authSlice';
+import {connectSocket, disconnectSocket} from "../store/socketSlice"
 import { ApiHandler } from '../utils/ApiHandler';
 import io from 'socket.io-client';
 
@@ -38,6 +39,10 @@ function ChatRoom() {
             withCredentials: true,
         });
 
+        dispatch(connectSocket({
+          socket:socket
+        }))
+
         // Listen for server messages
         socket.on('connect', () => {
             console.log('Connected to Socket.IO server');
@@ -55,6 +60,7 @@ function ChatRoom() {
         // Cleanup function to disconnect the socket when the component unmounts
         return () => {
             socket.disconnect();
+            dispatch(disconnectSocket())
         };
     }
 }, [selector?.userID]);
