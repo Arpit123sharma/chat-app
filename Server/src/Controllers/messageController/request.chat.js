@@ -1,3 +1,4 @@
+import { User } from "../../Models/user.model.js"
 import { ApiResponse } from "../../utils/ApiResponse.js"
 import { ApiError } from "../../utils/error.js"
 
@@ -14,6 +15,25 @@ const sendingRequestToConnect = async(req,res)=>{
     }
 }
 
+const fetchPendingMessages = async(req,res)=>{
+    try {
+        console.log("api hit");
+        const userID = req?.user?._id
+        
+        const pendingMessages = await User.findById(userID).select("pendingMessages")
+
+        if (!pendingMessages) {
+            return res.status(500).json(new ApiError(500,`oops you dont have any pending messages`))
+        }
+
+        return res.status(200).json(new ApiResponse("successfully fetch pending messages",{
+            pendingMessages
+        },200))
+    } catch (error) {
+        return res.status(500).json(new ApiError(500,`something went wrong while fetching pending messages :: ERROR:${error}`))
+    }
+}
+
 export{
-    sendingRequestToConnect
+    fetchPendingMessages
 }

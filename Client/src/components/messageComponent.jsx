@@ -7,19 +7,27 @@ import { CircularProgress } from '@nextui-org/react';
 import UserComponent from './UserComponent';
 import TextingInterface from './TextingInterface';
 
-function MessageComponent() {
+function MessageComponent({
+    setMessage
+}) {
     const [search, setSearch] = useState(false);
-    const [value, setValue, loading, error, response] = ApiHandler(`${import.meta.env.VITE_API_URL_HEADER}/`, "get");
+    const [value, setValue, loading, error, response] = ApiHandler(`${import.meta.env.VITE_API_URL_HEADER}/`,"get");
+    const [value1, setValue1, loading1, error1, response1] = ApiHandler(`${import.meta.env.VITE_API_URL_HEADER}/`,"get");
     const [friends, setFriends] = useState([]);
     const [MountTextingInterface,setMountTextingInterface] = useState(false)
     const [textingInterfaceData,setTextingInterfaceData] = useState({})
 
     useEffect(() => {
-        setValue("Home/friendList");
+        if(!value) setValue("Home/friendList");
         if (response?.data?.data) {
             setFriends(response.data.data.friends);
         }
     }, [response]);
+
+    useEffect(()=>{
+        if(!value1) setValue1("messages/pendingMessages");
+
+    },[response1])
 
     return (
         <div className='w-full h-full flex'>
@@ -67,7 +75,7 @@ function MessageComponent() {
                 </div>
             </div>
             <div className='w-full h-full'>
-                {search ? (<Searching />) : (MountTextingInterface ? (<TextingInterface setMountTextingInterface={setMountTextingInterface} textingInterfaceData={textingInterfaceData}/>):(null))}
+                {search ? (<Searching />) : (MountTextingInterface ? (<TextingInterface setMountTextingInterface={setMountTextingInterface} textingInterfaceData={textingInterfaceData} setMessage={setMessage}/>):(null))}
             </div>
         </div>
     );

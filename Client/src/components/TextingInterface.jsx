@@ -7,13 +7,18 @@ import { IoMdArrowRoundBack } from "react-icons/io";
 import { MdCall } from "react-icons/md";
 import { FaVideo } from "react-icons/fa6";
 import { SlOptionsVertical } from "react-icons/sl";
+import { useSelector } from 'react-redux';
 
 function TextingInterface({
   textingInterfaceData,
-  setMountTextingInterface
+  setMountTextingInterface,
+  setMessage
 }) {
+  const selector = useSelector((state)=>state.auth.userData)
   const [online,setOnline] = useState(false)
   const [micOn, setMicOn] = useState(false)
+  const [inputText,setInputText] = useState("")
+  
   return (
     <div className='w-full h-full rounded-tr-lg overflow-hidden rounded-br-lg relative'>
         <div className='w-full h-auto  p-2 flex justify-between items-center bg-slate-950 '>
@@ -35,7 +40,7 @@ function TextingInterface({
            <BsFillFileRuledFill  className='text-white cursor-pointer text-xl'/>
            <IoMdMic className='text-white cursor-pointer text-xl'/>
            <Input
-              isClearable
+              
               radius="lg"
               classNames={{
                 label: "text-black/50 dark:text-white/90",
@@ -58,11 +63,24 @@ function TextingInterface({
                   "!cursor-text",
                 ],
               }}
-              placeholder="Type to search..."
+              placeholder="Type a message..."
+
+              value={inputText}
               
-              onChange={(e)=>(null)}
+              onChange={(e)=>(setInputText(e.target.value))}
             />
-            <LuSend className='text-white cursor-pointer text-xl'/>
+            <LuSend className='text-white cursor-pointer text-xl' onClick={()=>{
+              setMessage({
+                from: selector?.userID,
+                to:textingInterfaceData?.userID,
+                payload:inputText,
+                time:Date.now(),
+                receiver:"individual",
+                payloadType:"text"
+              })
+              setInputText("")
+              console.log(message,"this message is sent to the chat-server");
+            }}/>
         </div>
         <div className='w-full h-full bg-rose-400'>
 

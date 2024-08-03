@@ -73,6 +73,10 @@ const userSchema = new Schema({
         message:{
             type:Schema.Types.ObjectId,
             ref:'Chat'
+        },
+        from:{
+            type:Schema.Types.ObjectId,
+            ref:'User'
         }
     }]
 

@@ -8,9 +8,9 @@ const app = express(); // express server
 const server = createServer(app);
 const io = new SocketIOServer(server, {
   cors: {
-    origin: "http://localhost:5173",
+    origin: "*",
     methods: ["GET", "POST"],
-    credentials: true,
+    // credentials: true,
   },
 });
 
@@ -51,7 +51,7 @@ app.use("/chat-app/api/v1/user", userRouter); // to manage user
 app.use("/chat-app/api/v1/SearchFriends", searchRouter); // searching for friends
 app.use("/chat-app/api/v1/requests", requestRoute); // route for sending friend request and cancelling, acceptance
 app.use("/chat-app/api/v1/Home", friendsRoute); // fetching friend list using this route
-app.use("/chat-app/api/v1/ws", wsRoute); // to take the port to connect with ws server
+app.use("/chat-app/api/v1/messages", wsRoute); // 
 app.use("/chat-app/api/v1/ws-message", fileMessageRoute);
 
 // Store the users in the map who are online
@@ -66,7 +66,9 @@ io.on("connection", (socket) => {
     onlineUsersList.set(userID, socket);
     console.log(`User with ID: ${userID} is successfully connected to the Socket.IO server!`);
 
-    socket.on("message", (data) => {
+    socket.emit("welcome", JSON.stringify({ message: `Welcome to the chat server! ${Math.random()}` }));
+
+    socket.on("message", async (data) => {
       console.log(`Received a message from ${userID}, message is ${data}`);
       socket.emit("response", {
         type: "A-S",
@@ -82,7 +84,7 @@ io.on("connection", (socket) => {
 
       if (parseData.receiver === "individual") {
         // message-handler-individual-user
-        const [senderFriendList, receiverFriendList] = textMessageHandlerForIndi(socket, parseData, onlineUsersList);
+        const [senderFriendList, receiverFriendList] = await textMessageHandlerForIndi(socket, parseData, onlineUsersList);
 
         if (onlineUsersList.has(parseData.from)) {
           socket.emit("message", senderFriendList);

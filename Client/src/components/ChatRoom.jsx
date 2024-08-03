@@ -33,7 +33,7 @@ function ChatRoom() {
   useEffect(() => {
     if (selector?.userID) {
         // Connect to the Socket.IO server
-        const socket = io(`http://localhost:8000`, {
+        const socket = io(`ws://localhost:8000`, {
             query: { id: selector.userID }, // Pass userID in the query parameters
             withCredentials: true,
         });

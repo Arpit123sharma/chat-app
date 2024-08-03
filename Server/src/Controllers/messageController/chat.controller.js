@@ -14,10 +14,13 @@ const textMessageHandlerForIndi = async(ws,message,onlineUsers)=>{
         const senderID = message.from
         const receiverStatus = onlineUsers.has(receiverID.trim())
         if(receiverStatus){ // if receiver is online
+          console.log("online user is caalling");
          const wsConnectionForRec = onlineUsers.get(receiverID.trim())
          const wsConnectionForSend = onlineUsers.get(senderID.trim())
-           wsConnectionForRec.send(JSON.stringify(message))
-           wsConnectionForSend.send(JSON.stringify({type:'A-D',status:true}))
+          //  console.log("socket connection of rec",wsConnectionForRec);
+          //  console.log("socket connection of sender",wsConnectionForSend);
+           wsConnectionForRec.emit("message_received",JSON.stringify(message))
+           wsConnectionForSend.emit("response",JSON.stringify({type:'A-D',status:true}))
            await Chat.create({
              From:message.from,
              Payload:message.payload,
@@ -48,8 +51,9 @@ const textMessageHandlerForIndi = async(ws,message,onlineUsers)=>{
            return [sender.friends,receiver.friends]
         }
         else{ // for offline user
+          console.log("offline user is caalling");
             const wsConnectionForSend = onlineUsers.get(senderID.trim())
-            wsConnectionForSend.send(JSON.stringify({type:'A-D',status:false}))
+            wsConnectionForSend.send("response",JSON.stringify({type:'A-D',status:false}))
             const savedMessage = await Chat.create({
                 From:message.from,
                 Payload:message.payload,
@@ -59,11 +63,10 @@ const textMessageHandlerForIndi = async(ws,message,onlineUsers)=>{
                 PayloadType:message.payloadType
               })
             const user = await User.findById(message.to) //push the message in receivers pending messages or unread message list
-            console.log(user);
             if(!user){
                 ws.send(new ApiError(500,`something went wrong while fetching offline user message from the user::ERROR:`))
             }
-            user.pendingMessages.push({message:savedMessage?._id})
+            user.pendingMessages.push({message:savedMessage?._id,from:savedMessage?.From})
             await user.save({
                 validateBeforeSave:false
             })
