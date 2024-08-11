@@ -70,14 +70,17 @@ const userSchema = new Schema({
         }
     },],
     pendingMessages:[{
-        message:{
-            type:Schema.Types.ObjectId,
-            ref:'Chat'
-        },
-        from:{
-            type:Schema.Types.ObjectId,
-            ref:'User'
-        }
+        
+            friendId:{
+                type:Schema.Types.ObjectId,
+                ref:'User'
+            },
+            unreadCount:{
+                type:Number
+            },
+            lastMessage:{
+                type:String
+            }       
     }]
 
 },{

@@ -69,7 +69,7 @@ function MessageComponent({
                                 </div>
                             ))
                         ) : (
-                            <p className='text-white text-center'>No friends to display</p>
+                            (!error && <p className='text-white text-center'>No friends to display</p>)
                         )
                     )}
                 </div>

@@ -47,7 +47,10 @@ function ChatRoom() {
         socket.on('connect', () => {
             console.log('Connected to Socket.IO server');
         });
-
+        
+        socket.on('welcome',(data)=>{
+          console.log('welcome message has arrived from server',data);
+        })
         socket.on('response', (data) => {
             console.log('Received data from server:', data);
         });

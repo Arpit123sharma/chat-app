@@ -8,9 +8,9 @@ const app = express(); // express server
 const server = createServer(app);
 const io = new SocketIOServer(server, {
   cors: {
-    origin: "*",
+    origin: "http://localhost:5173",
     methods: ["GET", "POST"],
-    // credentials: true,
+    credentials: true,
   },
 });
 

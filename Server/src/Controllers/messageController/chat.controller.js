@@ -50,7 +50,8 @@ const textMessageHandlerForIndi = async(ws,message,onlineUsers)=>{
 
            return [sender.friends,receiver.friends]
         }
-        else{ // for offline user
+        else{ 
+          // for offline user
           console.log("offline user is caalling");
             const wsConnectionForSend = onlineUsers.get(senderID.trim())
             wsConnectionForSend.send("response",JSON.stringify({type:'A-D',status:false}))
@@ -66,10 +67,23 @@ const textMessageHandlerForIndi = async(ws,message,onlineUsers)=>{
             if(!user){
                 ws.send(new ApiError(500,`something went wrong while fetching offline user message from the user::ERROR:`))
             }
-            user.pendingMessages.push({message:savedMessage?._id,from:savedMessage?.From})
-            await user.save({
+            // pendingMessages updating 
+
+            let indexForPendingMessage = user.pendingMessages.findIndex((obj)=>obj.friendId === savedMessage?.From)
+
+            if (indexForPendingMessage !== -1) {
+              user.pendingMessages[indexForPendingMessage].unreadCount += 1
+              user.pendingMessages[indexForPendingMessage].lastMessage = savedMessage.Payload
+              await user.save({
                 validateBeforeSave:false
-            })
+              })
+            } else {
+              user.pendingMessages.push({friendId:savedMessage.From,unreadCount : 1,lastMessage:savedMessage.Payload})
+              await user.save({
+                  validateBeforeSave:false
+              })
+            }
+
             // updating friend list 
 
             const sender = await User.findById(senderID)
@@ -162,6 +176,30 @@ const fileHandler = async(req,res)=>{
   }
 }
 
+const fetchChats = async(req,res)=>{
+  try {
+    const {user1ID,user2ID,skip,limit=20} = req.query
+    if (!user1ID || !user2ID || !skip || !limit) {
+      return res.status(400).json(new ApiError(400,`user1ID,user2ID,skip,limit :: All these fields are required !!`))
+    }
+
+    const Messages = await Chat.find({
+      $or : [{From : user1ID , To: user2ID},{From : user2ID , To: user1ID}]
+    })
+    .sort({Timestamp:-1})
+    .skip(skip)
+    .limit(limit)
+
+    if (!Messages) {
+      return res.status(500).json(new ApiError(500,`no chats are found between these two users!!`))
+    }
+
+    return res.status(200).json(new ApiResponse("successfully fetch all messages between these users",Messages,200))
+
+  } catch (error) {
+    return res.status(500).json(new ApiError(500,`something went wrong while fetching chats ${error}`))
+  }
+}
 export{
     textMessageHandlerForIndi,
     textMessageHandlerForGroup,
