@@ -13,6 +13,7 @@ function MessageComponent({
     const [search, setSearch] = useState(false);
     const [value, setValue, loading, error, response] = ApiHandler(`${import.meta.env.VITE_API_URL_HEADER}/`,"get");
     const [value1, setValue1, loading1, error1, response1] = ApiHandler(`${import.meta.env.VITE_API_URL_HEADER}/`,"get");
+    
     const [friends, setFriends] = useState([]);
     const [MountTextingInterface,setMountTextingInterface] = useState(false)
     const [textingInterfaceData,setTextingInterfaceData] = useState({})

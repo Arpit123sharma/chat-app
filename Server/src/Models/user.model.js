@@ -21,6 +21,12 @@ const userSchema = new Schema({
     },
     dp:{
         type:String,
+        default:""
+    },
+    gender: {
+        type: String,
+        enum: ['Male', 'Female'],
+        required: true
     },
     password:{
         type:String,
@@ -42,7 +48,6 @@ const userSchema = new Schema({
         lastMessage:{
             type:Date,
         }
-
      }
     ],
     groups:[
@@ -105,8 +110,7 @@ userSchema.methods.isPasswordCorrect = async function(password){
 
 userSchema.methods.generateTokens = async function(time,data = {}){
     try {
-        
-      
+              
         return await jwt.sign({
             _id : this._id,
             ...data

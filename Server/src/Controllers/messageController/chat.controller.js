@@ -14,7 +14,7 @@ const textMessageHandlerForIndi = async(ws,message,onlineUsers)=>{
         const senderID = message.from
         const receiverStatus = onlineUsers.has(receiverID.trim())
         if(receiverStatus){ // if receiver is online
-          console.log("online user is caalling");
+          console.log("online user is calling");
          const wsConnectionForRec = onlineUsers.get(receiverID.trim())
          const wsConnectionForSend = onlineUsers.get(senderID.trim())
           //  console.log("socket connection of rec",wsConnectionForRec);
@@ -30,25 +30,12 @@ const textMessageHandlerForIndi = async(ws,message,onlineUsers)=>{
              PayloadType:message.payloadType
            })
            //updating the friend list
-           const sender = await User.findById(senderID)
-           const receiver = await User.findById(receiverID)
+            const sender = await User.findById(senderID);
+            const receiver = await User.findById(receiverID);
+              // function to update user friend list
+             
+            return  await updateFriendList(sender,receiver);
 
-           const senderListIndex = sender.friends.findIndex(friend=>friend.friendId === receiverID)
-           const receiverListIndex = receiver.friends.findIndex(friend=>friend.friendId === senderID)
-
-           if (senderListIndex !== -1 && receiverListIndex !== -1) {
-
-             sender.friends[senderListIndex].lastMessage = Date.now()
-             receiver.friends[receiverListIndex].lastMessage = Date.now()
-
-             sender.friends.sort((a,b)=>(b.lastMessage - a.lastMessage))
-             receiver.friends.sort((a,b)=>(b.lastMessage - a.lastMessage))
-
-           }
-           await sender.save({validateBeforeSave:false})
-           await receiver.save({validateBeforeSave:false})
-
-           return [sender.friends,receiver.friends]
         }
         else{ 
           // for offline user
@@ -63,51 +50,54 @@ const textMessageHandlerForIndi = async(ws,message,onlineUsers)=>{
                 Delivered:true,
                 PayloadType:message.payloadType
               })
-            const user = await User.findById(message.to) //push the message in receivers pending messages or unread message list
+            const user = await User.findById(message.to) 
+            
+            //push the message in receivers pending messages or unread message list
+
             if(!user){
                 ws.send(new ApiError(500,`something went wrong while fetching offline user message from the user::ERROR:`))
             }
             // pendingMessages updating 
+            console.log(user.pendingMessages[4].friendId,typeof(message.from));
+            
+            let indexForPendingMessage
 
-            let indexForPendingMessage = user.pendingMessages.findIndex((obj)=>obj.friendId === savedMessage?.From)
+            user.pendingMessages.map((msg,index)=>{
+              if (msg?.friendId.equals(message.from)) {
+                console.log("it works",index);
+                indexForPendingMessage = index
+              }
+            })
 
-            if (indexForPendingMessage !== -1) {
-              user.pendingMessages[indexForPendingMessage].unreadCount += 1
-              user.pendingMessages[indexForPendingMessage].lastMessage = savedMessage.Payload
-              await user.save({
-                validateBeforeSave:false
-              })
+            if (indexForPendingMessage) {
+              // Update existing pending message
+              user.pendingMessages[indexForPendingMessage].unreadCount += 1;
+              user.pendingMessages[indexForPendingMessage].lastMessage = savedMessage.Payload;
             } else {
-              user.pendingMessages.push({friendId:savedMessage.From,unreadCount : 1,lastMessage:savedMessage.Payload})
-              await user.save({
-                  validateBeforeSave:false
-              })
+              // Insert new pending message
+              console.log("start else code");
+              
+              user.pendingMessages.push({
+                friendId: savedMessage.From,
+                unreadCount: 1,
+                lastMessage: savedMessage.Payload
+              });
             }
+
+            await user.save({
+              validateBeforeSave: false
+            });
 
             // updating friend list 
 
             const sender = await User.findById(senderID)
             const receiver = user
 
-            const senderListIndex = sender.friends.findIndex(friend=>friend.friendId === receiver?._id)
-            const receiverListIndex = receiver.friends.findIndex(friend=>friend.friendId === senderID)
-
-            if (senderListIndex !== -1 && receiverListIndex !== -1) {
-
-              sender.friends[senderListIndex].lastMessage = Date.now()
-              receiver.friends[receiverListIndex].lastMessage = Date.now()
-
-              sender.friends.sort((a,b)=>(b.lastMessage - a.lastMessage))
-              receiver.friends.sort((a,b)=>(b.lastMessage - a.lastMessage))
-
-            }
-            await sender.save({validateBeforeSave:false})
-            await receiver.save({validateBeforeSave:false})
-
-            return [sender.friends,receiver.friends]
+            return await updateFriendList(sender,receiver)
         }  
    } catch (error) {
      ws.send(JSON.stringify(new ApiError(500,`something went wrong while handling message from the user::ERROR:${error}`)))
+     return [null,null]
    }
 }
 
@@ -198,6 +188,39 @@ const fetchChats = async(req,res)=>{
 
   } catch (error) {
     return res.status(500).json(new ApiError(500,`something went wrong while fetching chats ${error}`))
+  }
+}
+
+const updateFriendList = async(sender,receiver)=>{
+  try {
+    const senderListIndex = sender.friends.findIndex(friend => friend.friendId.equals(receiver._id));
+    const receiverListIndex = receiver.friends.findIndex(friend => friend.friendId.equals(sender._id));
+
+    if (senderListIndex !== -1 && receiverListIndex !== -1) {
+      console.log(sender.friends[senderListIndex].lastMessage);
+      
+      sender.friends[senderListIndex].lastMessage = Date.now();
+      receiver.friends[receiverListIndex].lastMessage = Date.now();
+
+      console.log(sender.friends[senderListIndex].lastMessage)
+
+      sender.friends.sort((a, b) => new Date(b.lastMessage) - new Date(a.lastMessage));
+      receiver.friends.sort((a, b) => new Date(b.lastMessage) - new Date(a.lastMessage));
+
+
+      await sender.save({ validateBeforeSave: false });
+      await receiver.save({ validateBeforeSave: false });
+ 
+      console.log(sender.friends,receiver.friends);
+      
+      return [sender.friends,receiver.friends]
+    } else {
+      throw new Error("Friend not found in the list");
+    }
+
+  } catch (error) {
+     console.log("error occured while updating friend list:",error);
+     throw new Error(`failed to update friend list ${error}`)
   }
 }
 export{

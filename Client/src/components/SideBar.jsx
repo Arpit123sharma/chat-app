@@ -6,7 +6,9 @@ import { HiMiniArrowsRightLeft } from "react-icons/hi2";
 import { RiLogoutBoxLine } from "react-icons/ri";
 import {Avatar} from "@nextui-org/react";
 
-function SideBar() {
+function SideBar({
+  avatar
+}) {
   return (
     <div className='w-1/12 relative  h-full'>
        <div className='flex flex-col justify-center items-center absolute top-1/4 h-2/5 w-full  gap-5'>
@@ -29,7 +31,7 @@ function SideBar() {
       
     </div>
        <div className='absolute bottom-1 h-1/5 flex justify-center items-center w-full'>
-         <Avatar isBordered color="danger" src="https://i.pravatar.cc/150?u=a04258114e29026708c" />
+         <Avatar isBordered color="danger" src={avatar} />
        </div>
     </div>
   )

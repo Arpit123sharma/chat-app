@@ -4,11 +4,12 @@ import {ApiResponse} from "../utils/ApiResponse.js"
 import { emailService } from "../utils/smsService.js"
 import { ApiError } from "../utils/error.js"
 
-
+const maleAvatar = ["https://res.cloudinary.com/deuq8e88u/image/upload/v1724139559/4333609_wairyo.png","https://res.cloudinary.com/deuq8e88u/image/upload/v1724139558/924915_s9g6ei.png","https://res.cloudinary.com/deuq8e88u/image/upload/v1724139558/4140037_sogwvz.png","https://res.cloudinary.com/deuq8e88u/image/upload/v1724139558/4140037_sogwvz.png"]
+const femaleAvatar = ["https://res.cloudinary.com/deuq8e88u/image/upload/v1724139628/706830_pmkglf.png","https://res.cloudinary.com/deuq8e88u/image/upload/v1724139629/4322991_abrfx5.png","https://res.cloudinary.com/deuq8e88u/image/upload/v1724139629/11498793_smdaul.png"]
 const registerUser = async(req,res)=>{
     try {
-       const{userName,password,phone,email} =  req.body
-       if ([userName,password,phone,email].forEach((value)=>(value?.trim() === ""))
+       const{userName,password,phone,email,gender} =  req.body
+       if ([userName,password,phone,email,gender].forEach((value)=>(value?.trim() === ""))
       ) {
          return res.status(400)
          .json(new ApiError(400,"every feild is required !!"))
@@ -27,13 +28,21 @@ const registerUser = async(req,res)=>{
         return res.status(400).json( new ApiError(400,"user with the same email or phone already exists"));
        }
       
-      
+       let dp = null;
+
+       if (gender === "Male") {
+        dp = maleAvatar[Math.floor(Math.random()*maleAvatar.length)]
+       } else {
+        dp = femaleAvatar[Math.floor(Math.random()*femaleAvatar.length)]
+       }
        
        const createdUser = await User.create({
          userName,
          email,
          phone,
-         password
+         password,
+         gender,
+         dp
        })
        
        //console.log(createdUser);

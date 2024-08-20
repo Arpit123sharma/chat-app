@@ -71,7 +71,7 @@ function ChatRoom() {
   
   return (
     <div className='w-9/12 h-4/5 flex'>
-      <SideBar />
+      <SideBar avatar={selector?.dp}/>
       <div className='flex-grow'>
         <Outlet />
       </div>

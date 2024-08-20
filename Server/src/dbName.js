@@ -1,3 +1,3 @@
-const dbName = "chatDB";
+const dbName = "chatTestDB";
 export default dbName
 
