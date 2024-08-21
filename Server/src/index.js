@@ -1,6 +1,7 @@
 import dotenv from 'dotenv'
 import {connectDB} from "./DB/mongodb.connection.js"
 import { server } from './app.js'
+// import { clearDB } from './dbName.js'
 
 
 //env file configuration
@@ -16,6 +17,7 @@ connectDB()
     server.listen(port,()=>{
         console.log(`server is listing on ${port}`);
         console.log(`http://localhost:${port}`);
+        // clearDB("neetu sharma")
     })
 })
 .catch((err)=>{

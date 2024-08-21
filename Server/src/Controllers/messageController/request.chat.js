@@ -15,6 +15,34 @@ const sendingRequestToConnect = async(req,res)=>{
     }
 }
 
+const readPendingMessage = async(req,res)=>{
+    try {
+        const userID = req?.user?._id
+        const {friendsID} = req.params
+
+        if (!friendsID.trim()) {
+            return res.status(400).json(new ApiError(400,`friendsID is required`))
+        }
+
+        const updatedUser = await User.findByIdAndUpdate(
+            userID,
+            { $pull: { pendingMessages: { friendId: friendsID } } },
+            { new: true, validateBeforeSave: false }
+        );
+
+        if (!updatedUser) {
+            return res.status(500).json(new ApiError(500,`foops something went wrong while updating the pending message list `))
+        }
+
+        const pendingMessages = updatedUser.pendingMessages
+
+        return res.status(200).json(new ApiResponse("successfully read pending messages",{pendingMessages},200))
+
+    } catch (error) {
+        return res.status(500).json(new ApiError(500,`something went wrong while removing messages from pending list :: ERROR:${error}`))
+    }
+}
+
 const fetchPendingMessages = async(req,res)=>{
     try {
         console.log("api hit");
@@ -35,5 +63,6 @@ const fetchPendingMessages = async(req,res)=>{
 }
 
 export{
-    fetchPendingMessages
+    fetchPendingMessages,
+    readPendingMessage
 }

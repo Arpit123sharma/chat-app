@@ -13,10 +13,13 @@ function MessageComponent({
     const [search, setSearch] = useState(false);
     const [value, setValue, loading, error, response] = ApiHandler(`${import.meta.env.VITE_API_URL_HEADER}/`,"get");
     const [value1, setValue1, loading1, error1, response1] = ApiHandler(`${import.meta.env.VITE_API_URL_HEADER}/`,"get");
-    
+    const [value2, setValue2, loading2, error2, response2] = ApiHandler(`${import.meta.env.VITE_API_URL_HEADER}/`,"get");
+
     const [friends, setFriends] = useState([]);
     const [MountTextingInterface,setMountTextingInterface] = useState(false)
     const [textingInterfaceData,setTextingInterfaceData] = useState({})
+    const [pendingMessages,setPendingMessages] = useState(new Map())
+    
 
     useEffect(() => {
         if(!value) setValue("Home/friendList");
@@ -27,8 +30,31 @@ function MessageComponent({
 
     useEffect(()=>{
         if(!value1) setValue1("messages/pendingMessages");
+        if(response1?.data?.data?.pendingMessages?.pendingMessages.length > 0 ){
+            const messgList = response1?.data?.data?.pendingMessages?.pendingMessages
+            
+            const map = new Map()
+            messgList.forEach(mssg => {
+                map.set(mssg.friendId,mssg)
+            });
 
+            setPendingMessages(map)
+        }
     },[response1])
+
+    useEffect(()=>{
+        if (response2?.data?.data?.pendingMessages) {
+            const messgList = response2?.data?.data?.pendingMessages
+            
+            const map = new Map()
+            messgList.forEach(mssg => {
+                map.set(mssg.friendId,mssg)
+            });
+
+            setPendingMessages(map)
+        }
+        
+    },[response2])
 
     return (
         <div className='w-full h-full flex'>
@@ -52,24 +78,36 @@ function MessageComponent({
                         </div>
                     ) : (
                         friends && friends.length > 0 ? (
-                            friends.map((friend, index) => (
-                                <div className='p-3' key={index} onClick={()=>{
+                            friends.map((friend, index) => { 
+                                const userId = friend?.friendId?._id
+                                let pendingMessageResponse
+                                if(pendingMessages.has(userId)){
+                                    pendingMessageResponse = pendingMessages.get(userId)
+                                }
+                                
+                                return (                               
+                                <div className='p-3 ml-5' key={index} onClick={()=>{
                                   setMountTextingInterface(true)
                                   setTextingInterfaceData({
                                     userName:friend?.friendId?.userName,
                                     dp:friend?.friendId?.dp,
                                     userID:friend?.friendId?._id
                                   })
-                                }}>
+                                  if(pendingMessages.has(userId)){
+                                    setValue2(`messages/readPendingMessages/${friend?.friendId?._id}`)
+                                   }
+
+                                }}>   
                                     <UserComponent
                                         userName={friend?.friendId?.userName}
                                         avatar={friend?.friendId?.dp}
                                         _id={friend?.friendId?._id}
                                         displayState='text'
+                                        pendingMessageResponse = {pendingMessageResponse}
                                     />
                                 </div>
-                            ))
-                        ) : (
+                            )})
+                         ) : (
                             (!error && <p className='text-white text-center'>No friends to display</p>)
                         )
                     )}

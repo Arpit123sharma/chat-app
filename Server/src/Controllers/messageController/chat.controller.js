@@ -39,7 +39,7 @@ const textMessageHandlerForIndi = async(ws,message,onlineUsers)=>{
         }
         else{ 
           // for offline user
-          console.log("offline user is caalling");
+          console.log("offline user is calling");
             const wsConnectionForSend = onlineUsers.get(senderID.trim())
             wsConnectionForSend.send("response",JSON.stringify({type:'A-D',status:false}))
             const savedMessage = await Chat.create({
@@ -58,7 +58,6 @@ const textMessageHandlerForIndi = async(ws,message,onlineUsers)=>{
                 ws.send(new ApiError(500,`something went wrong while fetching offline user message from the user::ERROR:`))
             }
             // pendingMessages updating 
-            console.log(user.pendingMessages[4].friendId,typeof(message.from));
             
             let indexForPendingMessage
 
@@ -69,7 +68,7 @@ const textMessageHandlerForIndi = async(ws,message,onlineUsers)=>{
               }
             })
 
-            if (indexForPendingMessage) {
+            if (indexForPendingMessage>=0) {
               // Update existing pending message
               user.pendingMessages[indexForPendingMessage].unreadCount += 1;
               user.pendingMessages[indexForPendingMessage].lastMessage = savedMessage.Payload;
