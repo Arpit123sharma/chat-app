@@ -1,18 +1,18 @@
-import {User} from "./Models/user.model.js"
+// import {User} from "./Models/user.model.js"
 const dbName = "chatTestDB";
 export default dbName
 
 // export const clearDB = async (name)=>{
 //     try {
 //         const user = await User.findOne({userName:name})
-//         console.log(name,user.pendingMessages);
+//         console.log(name,user.friends);
         
-//         user.pendingMessages = []
+//         user.friends = []
 //         await user.save({
 //             validateBeforeSave:false
 //         })
 
-//         console.log(user.pendingMessages);
+//         console.log(user.friends);
         
 //     } catch (error) {
 //         console.log(error);

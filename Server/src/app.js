@@ -45,6 +45,7 @@ import friendsRoute from "./Routes/friends/friend.routes.js";
 import wsRoute from "./Routes/messageRoutes/request.route.js";
 import fileMessageRoute from "./Routes/messageRoutes/chat.route.js";
 import { textMessageHandlerForGroup, textMessageHandlerForIndi } from "./Controllers/messageController/chat.controller.js";
+import { User } from "./Models/user.model.js";
 
 // Routing declaration
 app.use("/chat-app/api/v1/user", userRouter); // to manage user
@@ -66,15 +67,11 @@ io.on("connection", (socket) => {
     onlineUsersList.set(userID, socket);
     console.log(`User with ID: ${userID} is successfully connected to the Socket.IO server!`);
 
-    socket.emit("welcome", JSON.stringify({ message: `Welcome to the chat server! ${Math.random()}` }));
+    socket.emit("welcome", JSON.stringify({ message: `Welcome to the chat server! ` }));
 
-    socket.on("message", async (data) => {
+    socket.on("message_sended", async (data) => {
       console.log(`Received a message from ${userID}, message is ${data}`);
-      socket.emit("response", {
-        type: "A-S",
-        status: true,
-      });
-
+      
       let parseData;
       try {
         parseData = JSON.parse(data);
@@ -84,15 +81,8 @@ io.on("connection", (socket) => {
 
       if (parseData.receiver === "individual") {
         // message-handler-individual-user
-        const [senderFriendList, receiverFriendList] = await textMessageHandlerForIndi(socket, parseData, onlineUsersList);
+         textMessageHandlerForIndi(socket, parseData, onlineUsersList);
 
-        if (onlineUsersList.has(parseData.from)) {
-          socket.emit("message", senderFriendList);
-        }
-        if (onlineUsersList.has(parseData.to)) {
-          const socketReceiver = onlineUsersList.get(parseData.to);
-          socketReceiver.emit("message", receiverFriendList);
-        }
       } else if (parseData.receiver === "group") {
         // message-handler-individual-group
         textMessageHandlerForGroup(socket, parseData, onlineUsersList);

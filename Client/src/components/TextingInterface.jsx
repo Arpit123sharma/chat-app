@@ -12,26 +12,44 @@ import { useSelector } from 'react-redux';
 function TextingInterface({
   textingInterfaceData,
   setMountTextingInterface,
+  setFriends,
+  friendsList
 }) {
   const selector = useSelector((state) => state.auth.userData);
   const [online, setOnline] = useState(false);
   const [inputText, setInputText] = useState("");
   const socket = useSelector((state) => state.socket.socket);
 
+  const updateFriendList = ()=>{
+    setFriends((prevFriends)=>{ 
+      return [...prevFriends].map((friend)=>{
+        if (friend.friendId._id === textingInterfaceData?.userID) {
+          return {
+            ...friend,
+            lastMessageDate:Date.now(), 
+            lastMessage:inputText
+          }
+        }
+        return friend ;
+      }).sort((a,b)=>new Date(b.lastMessageDate) - new Date(a.lastMessageDate))
+    })
+ }
+
   const handleSendMessage = () => {
     const message = {
       from: selector?.userID,
       to: textingInterfaceData?.userID,
       payload: inputText,
-      time: Date.now(),
+      time: new Date(),
       receiver: "individual",
       payloadType: "text",
     };
-    socket.emit("message", JSON.stringify(message));
+    socket.emit("message_sended", JSON.stringify(message));
     console.log(message, "this message is sent to the chat-server");
     console.log(socket.id);
     setInputText("");
   };
+
 
   return (
     <div className='w-full h-full rounded-tr-lg overflow-hidden rounded-br-lg relative'>
@@ -80,9 +98,13 @@ function TextingInterface({
           value={inputText}
           onChange={(e) => setInputText(e.target.value)}
         />
-        <LuSend className='text-white cursor-pointer text-xl' onClick={handleSendMessage} />
+        <LuSend className='text-white cursor-pointer text-xl' onClick={()=>{
+          handleSendMessage()
+          updateFriendList()
+        }} />
       </div>
-      <div className='w-full h-full bg-rose-400'>    
+      <div className='w-full h-full'>    
+
       </div>
     </div>
   );

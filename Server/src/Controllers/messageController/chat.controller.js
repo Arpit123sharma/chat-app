@@ -12,91 +12,69 @@ const textMessageHandlerForIndi = async(ws,message,onlineUsers)=>{
         // send message to the user
         const receiverID = message.to
         const senderID = message.from
+
         const receiverStatus = onlineUsers.has(receiverID.trim())
         if(receiverStatus){ // if receiver is online
-          console.log("online user is calling");
+
          const wsConnectionForRec = onlineUsers.get(receiverID.trim())
          const wsConnectionForSend = onlineUsers.get(senderID.trim())
-          //  console.log("socket connection of rec",wsConnectionForRec);
-          //  console.log("socket connection of sender",wsConnectionForSend);
+
            wsConnectionForRec.emit("message_received",JSON.stringify(message))
-           wsConnectionForSend.emit("response",JSON.stringify({type:'A-D',status:true}))
-           await Chat.create({
+        
+             Chat.create({
              From:message.from,
              Payload:message.payload,
              To:message.to,
              Time:message.time,
              Delivered:true,
              PayloadType:message.payloadType
-           })
-           //updating the friend list
-            const sender = await User.findById(senderID);
-            const receiver = await User.findById(receiverID);
-              // function to update user friend list
-             
-            return  await updateFriendList(sender,receiver);
-
+           }).catch(error => {
+            console.error("Failed to save message to DB:", error);
+            // Optionally handle error, such as retrying the save operation
+          });
+          
         }
         else{ 
-          // for offline user
-          console.log("offline user is calling");
-            const wsConnectionForSend = onlineUsers.get(senderID.trim())
-            wsConnectionForSend.send("response",JSON.stringify({type:'A-D',status:false}))
-            const savedMessage = await Chat.create({
-                From:message.from,
-                Payload:message.payload,
-                To:message.to,
-                Time:message.time,
-                Delivered:true,
-                PayloadType:message.payloadType
-              })
-            const user = await User.findById(message.to) 
-            
-            //push the message in receivers pending messages or unread message list
+         // For offline user
+          const wsConnectionForSend = onlineUsers.get(senderID.trim());
 
-            if(!user){
-                ws.send(new ApiError(500,`something went wrong while fetching offline user message from the user::ERROR:`))
-            }
-            // pendingMessages updating 
-            
-            let indexForPendingMessage
+          // Save the message to the Chat collection
+          const saveMessagePromise = Chat.create({
+              From: message.from,
+              Payload: message.payload,
+              To: message.to,
+              Time: message.time,
+              Delivered: true,
+              PayloadType: message.payloadType,
+          });
 
-            user.pendingMessages.map((msg,index)=>{
-              if (msg?.friendId.equals(message.from)) {
-                console.log("it works",index);
-                indexForPendingMessage = index
-              }
-            })
+          // Update the user’s friend list
+          const updateUserPromise = User.findOneAndUpdate(
+              { 
+                  _id: message.to, 
+                  "friends.friendId": message.from // Match user and specific friend
+              },
+              {
+                  $set: {
+                      "friends.$.lastMessage": message.payload, // Update lastMessage
+                      "friends.$.lastMessageDate": message.time // Update lastMessageDate
+                  },
+                  $inc: {
+                      "friends.$.unreadCount": 1 // Increment unreadCount
+                  }
+              },
+              { new: true, upsert: true } // Return the updated document and create if not found
+          );
 
-            if (indexForPendingMessage>=0) {
-              // Update existing pending message
-              user.pendingMessages[indexForPendingMessage].unreadCount += 1;
-              user.pendingMessages[indexForPendingMessage].lastMessage = savedMessage.Payload;
-            } else {
-              // Insert new pending message
-              console.log("start else code");
-              
-              user.pendingMessages.push({
-                friendId: savedMessage.From,
-                unreadCount: 1,
-                lastMessage: savedMessage.Payload
-              });
-            }
+          // Wait for both operations to complete
+          const [savedMessage, result] = await Promise.all([saveMessagePromise, updateUserPromise]);
 
-            await user.save({
-              validateBeforeSave: false
-            });
+          // Now you can handle the results as needed
 
-            // updating friend list 
-
-            const sender = await User.findById(senderID)
-            const receiver = user
-
-            return await updateFriendList(sender,receiver)
         }  
    } catch (error) {
      ws.send(JSON.stringify(new ApiError(500,`something went wrong while handling message from the user::ERROR:${error}`)))
-     return [null,null]
+     
    }
 }
 
@@ -201,7 +179,7 @@ const updateFriendList = async(sender,receiver)=>{
       sender.friends[senderListIndex].lastMessage = Date.now();
       receiver.friends[receiverListIndex].lastMessage = Date.now();
 
-      console.log(sender.friends[senderListIndex].lastMessage)
+      // console.log(sender.friends[senderListIndex].lastMessage)
 
       sender.friends.sort((a, b) => new Date(b.lastMessage) - new Date(a.lastMessage));
       receiver.friends.sort((a, b) => new Date(b.lastMessage) - new Date(a.lastMessage));
@@ -210,7 +188,7 @@ const updateFriendList = async(sender,receiver)=>{
       await sender.save({ validateBeforeSave: false });
       await receiver.save({ validateBeforeSave: false });
  
-      console.log(sender.friends,receiver.friends);
+      // console.log(sender.friends,receiver.friends);
       
       return [sender.friends,receiver.friends]
     } else {

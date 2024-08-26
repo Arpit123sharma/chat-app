@@ -143,7 +143,7 @@ const acceptRequestByUser = async(req,res)=>{ // request was accept by the recei
 
         if(!receiver) return res.status(400).json(new ApiError(400,`receiver not exists !!!`))
 
-        receiver.friends.push({friendId:requestFrom})
+        receiver.friends.push({friendId:requestFrom,lastMessageDate:new Date(0)})
         
         receiver.requestsArrived.pull({From:requestFrom})
         await receiver.save({
@@ -155,7 +155,7 @@ const acceptRequestByUser = async(req,res)=>{ // request was accept by the recei
 
         if(!sender) return res.status(400).json(new ApiError(400,`sender not exists !!!`))
 
-        sender.friends.push({friendId:requestTo})
+        sender.friends.push({friendId:requestTo,lastMessageDate:new Date(0)})
 
         sender.requestPendings.pull({From:requestTo})
 

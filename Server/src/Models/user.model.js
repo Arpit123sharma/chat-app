@@ -45,8 +45,16 @@ const userSchema = new Schema({
             type:Date,
             default:Date.now
         },
-        lastMessage:{
+        lastMessageDate:{
             type:Date,
+        },
+        unreadCount:{
+            type:Number,
+            default:0
+        },
+        lastMessage:{
+            type:String,
+            default:""
         }
      }
     ],
@@ -74,19 +82,7 @@ const userSchema = new Schema({
             ref:'User'
         }
     },],
-    pendingMessages:[{
-        
-            friendId:{
-                type:Schema.Types.ObjectId,
-                ref:'User'
-            },
-            unreadCount:{
-                type:Number
-            },
-            lastMessage:{
-                type:String
-            }       
-    }]
+    
 
 },{
     timestamps:true
