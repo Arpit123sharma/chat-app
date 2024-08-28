@@ -168,32 +168,20 @@ const fetchChats = async(req,res)=>{
   }
 }
 
-const updateFriendList = async(sender,receiver)=>{
+const updateFriendList = (userID,friendList)=>{
   try {
-    const senderListIndex = sender.friends.findIndex(friend => friend.friendId.equals(receiver._id));
-    const receiverListIndex = receiver.friends.findIndex(friend => friend.friendId.equals(sender._id));
+    const updatedFriendList = friendList.map((friend)=>{
+      return{
+        ...friend,
+        friendId:friend.friendId._id
+      }
+    })
 
-    if (senderListIndex !== -1 && receiverListIndex !== -1) {
-      console.log(sender.friends[senderListIndex].lastMessage);
-      
-      sender.friends[senderListIndex].lastMessage = Date.now();
-      receiver.friends[receiverListIndex].lastMessage = Date.now();
-
-      // console.log(sender.friends[senderListIndex].lastMessage)
-
-      sender.friends.sort((a, b) => new Date(b.lastMessage) - new Date(a.lastMessage));
-      receiver.friends.sort((a, b) => new Date(b.lastMessage) - new Date(a.lastMessage));
-
-
-      await sender.save({ validateBeforeSave: false });
-      await receiver.save({ validateBeforeSave: false });
- 
-      // console.log(sender.friends,receiver.friends);
-      
-      return [sender.friends,receiver.friends]
-    } else {
-      throw new Error("Friend not found in the list");
-    }
+    User.findByIdAndUpdate(userID,{
+      $set:{friends:updatedFriendList}
+    }).catch((error)=>{
+      console.error("Failed to updateFriendList message to DB:", error);
+    })
 
   } catch (error) {
      console.log("error occured while updating friend list:",error);
@@ -203,5 +191,7 @@ const updateFriendList = async(sender,receiver)=>{
 export{
     textMessageHandlerForIndi,
     textMessageHandlerForGroup,
-    fileHandler
+    fileHandler,
+    updateFriendList,
+    fetchChats
 }

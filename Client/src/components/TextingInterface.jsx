@@ -8,6 +8,7 @@ import { MdCall } from "react-icons/md";
 import { FaVideo } from "react-icons/fa6";
 import { SlOptionsVertical } from "react-icons/sl";
 import { useSelector } from 'react-redux';
+import socketService from '../utils/socketService';
 
 function TextingInterface({
   textingInterfaceData,
@@ -18,7 +19,7 @@ function TextingInterface({
   const selector = useSelector((state) => state.auth.userData);
   const [online, setOnline] = useState(false);
   const [inputText, setInputText] = useState("");
-  const socket = useSelector((state) => state.socket.socket);
+  const socket = socketService.socket
 
   const updateFriendList = ()=>{
     setFriends((prevFriends)=>{ 

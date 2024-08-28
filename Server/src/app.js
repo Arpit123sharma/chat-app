@@ -44,7 +44,7 @@ import requestRoute from "./Routes/friends/request.route.js";
 import friendsRoute from "./Routes/friends/friend.routes.js";
 import wsRoute from "./Routes/messageRoutes/request.route.js";
 import fileMessageRoute from "./Routes/messageRoutes/chat.route.js";
-import { textMessageHandlerForGroup, textMessageHandlerForIndi } from "./Controllers/messageController/chat.controller.js";
+import { textMessageHandlerForGroup, textMessageHandlerForIndi, updateFriendList } from "./Controllers/messageController/chat.controller.js";
 import { User } from "./Models/user.model.js";
 
 // Routing declaration
@@ -57,6 +57,7 @@ app.use("/chat-app/api/v1/ws-message", fileMessageRoute);
 
 // Store the users in the map who are online
 const onlineUsersList = new Map();
+const friendList = new Map()
 
 // Socket.IO server
 io.on("connection", (socket) => {
@@ -89,8 +90,16 @@ io.on("connection", (socket) => {
       }
     });
 
+    socket.on("friendList_update",(data)=>{ 
+        friendList.set(userID,data)    
+    })
+
     socket.on("disconnect", () => {
-      onlineUsersList.delete(userID);
+      if(friendList.has(userID)){
+         updateFriendList(userID,friendList.get(userID))
+         friendList.delete(userID)
+      }
+      onlineUsersList.delete(userID);      
       console.log(`User disconnected from the server with ID: ${userID}`);
     });
   } else {

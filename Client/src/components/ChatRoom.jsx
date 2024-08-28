@@ -3,9 +3,8 @@ import SideBar from './SideBar';
 import { Outlet } from 'react-router-dom';
 import { useSelector , useDispatch} from 'react-redux';
 import { login } from '../store/authSlice';
-import {connectSocket, disconnectSocket} from "../store/socketSlice"
 import { ApiHandler } from '../utils/ApiHandler';
-import io from 'socket.io-client';
+import socketService from '../utils/socketService';
 
 
 function ChatRoom() {
@@ -34,36 +33,14 @@ function ChatRoom() {
   useEffect(() => {
     if (selector?.userID) {
         // Connect to the Socket.IO server
-        const socket = io(`ws://localhost:8000`, {
-            query: { id: selector.userID }, // Pass userID in the query parameters
-            withCredentials: true,
-        });
-
-        dispatch(connectSocket({
-          socket:socket
-        }))
-
-        // Listen for server messages
-        socket.on('connect', () => {
-            console.log('Connected to Socket.IO server');
-        });
-        
-        socket.on('welcome',(data)=>{
-          console.log('welcome message has arrived from server',data);
+        socketService.connect(`ws://localhost:8000`,{
+          query: { id: selector.userID }, 
+          withCredentials: true,
         })
-        socket.on('response', (data) => {
-            console.log('Received data from server:', data);
-        });
-
-        // Handle disconnection
-        socket.on('disconnect', () => {
-            console.log('Disconnected from Socket.IO server');
-        });
 
         // Cleanup function to disconnect the socket when the component unmounts
         return () => {
-            socket.disconnect();
-            dispatch(disconnectSocket())
+            socketService.disconnect()
         };
     }
 }, [selector?.userID]);
